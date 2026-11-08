@@ -1,0 +1,71 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "oilleelssq-wq/moonxslt/xslt"
+
+import {
+  "oilleelssq-wq/moonxslt/xml",
+}
+
+// Values
+pub const XSLT_NAMESPACE : String = "http://www.w3.org/1999/XSL/Transform"
+
+pub fn compile(@xml.Document) -> Result[Stylesheet, String]
+
+pub fn compile_stylesheet(String) -> Result[Stylesheet, String]
+
+pub fn default_priority(String) -> Double
+
+pub fn in_scope_namespaces(@xml.Document, Int32) -> Array[(String, String)]
+
+pub fn parse_double(String) -> Double?
+
+pub fn run(Stylesheet, @xml.Document) -> Result[@xml.Document, String]
+
+pub fn serialise(@xml.Document, Stylesheet) -> String
+
+pub fn split_pattern_alternatives(String) -> Array[String]
+
+pub fn transform(String, String) -> Result[String, String]
+
+pub fn transform_documents(@xml.Document, Stylesheet) -> Result[@xml.Document, String]
+
+// Errors
+pub suberror XsltError {
+  Failure(String)
+}
+
+// Types and methods
+pub struct Stylesheet {
+  doc : @xml.Document
+  root_element : Int32
+  templates : Array[Template]
+  named : Array[(String, Int32)]
+  version : String
+  serialization_method : String
+  omit_xml_declaration : Bool
+  indent : Bool
+}
+pub fn Stylesheet::document(Self) -> @xml.Document
+pub fn Stylesheet::indents(Self) -> Bool
+pub fn Stylesheet::named_template(Self, String) -> Template?
+pub fn Stylesheet::omits_xml_declaration(Self) -> Bool
+pub fn Stylesheet::output_method(Self) -> String
+pub fn Stylesheet::template_count(Self) -> Int32
+pub fn Stylesheet::template_rules(Self) -> ArrayView[Template]
+pub fn Stylesheet::version(Self) -> String
+
+pub struct Template {
+  element : Int32
+  pattern : String?
+  name : String?
+  mode : String
+  priority : Double
+  order : Int32
+}
+pub fn Template::match_pattern(Self) -> String?
+pub fn Template::mode(Self) -> String
+pub fn Template::priority(Self) -> Double
+pub fn Template::template_name(Self) -> String?
+
+// Type aliases
+
+// Traits

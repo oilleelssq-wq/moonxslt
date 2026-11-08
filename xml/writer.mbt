@@ -5,11 +5,17 @@
 ///
 /// With `indent = true` the output is pretty printed: element children are put
 /// on their own lines, while text-only content stays inline.
-pub fn Document::to_xml(self : Document, indent~ : Bool = false) -> String {
+pub fn Document::to_xml(
+  self : Document,
+  indent~ : Bool = false,
+  declaration~ : Bool = true,
+) -> String {
   let sb = StringBuilder::StringBuilder()
-  sb.write_string("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-  if indent {
-    sb.write_char('\n')
+  if declaration {
+    sb.write_string("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+    if indent {
+      sb.write_char('\n')
+    }
   }
   match self.root() {
     Some(root) => self.write_node(root, sb, indent, 0)

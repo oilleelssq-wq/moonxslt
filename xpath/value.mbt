@@ -250,3 +250,21 @@ pub fn parse_number(text : String) -> Double {
     value
   }
 }
+
+///|
+/// Wrap a string as an XPath value.
+pub fn Value::of_string(text : String) -> Value {
+  String(text)
+}
+
+///|
+/// Wrap a number as an XPath value.
+pub fn Value::of_number(number : Double) -> Value {
+  Number(number)
+}
+
+///|
+/// Wrap a boolean as an XPath value.
+pub fn Value::of_boolean(flag : Bool) -> Value {
+  Boolean(flag)
+}

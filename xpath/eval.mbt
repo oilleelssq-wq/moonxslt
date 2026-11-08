@@ -665,3 +665,20 @@ fn optional_node_argument(
     raise EvaluationError::Message(name + "() expects at most one argument")
   }
 }
+
+///|
+/// Return a copy of the context with the given proximity position and size.
+pub fn EvalContext::with_position(
+  self : EvalContext,
+  position : Int32,
+  size : Int32,
+) -> EvalContext {
+  {
+    doc: self.doc,
+    node: self.node,
+    position,
+    size,
+    variables: self.variables,
+    namespaces: self.namespaces,
+  }
+}

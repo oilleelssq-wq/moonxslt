@@ -6,6 +6,8 @@ import {
 }
 
 // Values
+pub fn boolean_of(EvalContext, Expr) -> Result[Bool, String]
+
 pub fn evaluate(Expr, EvalContext) -> Value raise EvaluationError
 
 pub fn evaluate_path(@xml.Document, Int32, String) -> Result[Value, String]
@@ -17,6 +19,8 @@ pub fn format_number(Double) -> String
 pub fn matches_node_test(@xml.Document, Int32, Axis, NodeTest, Array[(String, String)]) -> Bool
 
 pub fn nan() -> Double
+
+pub fn number_of(EvalContext, Expr) -> Result[Double, String]
 
 pub fn of_boolean(Bool) -> Value
 
@@ -39,6 +43,8 @@ pub fn select_nodes(EvalContext, Expr) -> Result[NodeSet, String]
 pub fn select_number(@xml.Document, Int32, String) -> Result[Double, String]
 
 pub fn select_string(@xml.Document, Int32, String) -> Result[String, String]
+
+pub fn string_of(EvalContext, Expr) -> Result[String, String]
 
 pub fn string_of_node(@xml.Document, Int32) -> String
 
@@ -98,6 +104,7 @@ pub struct EvalContext {
 pub fn EvalContext::new(@xml.Document, Int32) -> Self
 pub fn EvalContext::with_namespaces(Self, Array[(String, String)]) -> Self
 pub fn EvalContext::with_node(Self, Int32) -> Self
+pub fn EvalContext::with_position(Self, Int32, Int32) -> Self
 pub fn EvalContext::with_variables(Self, Array[(String, Value)]) -> Self
 
 pub(all) enum Expr {
@@ -191,6 +198,9 @@ pub(all) enum Value {
 }
 pub fn Value::boolean_value(Self) -> Bool
 pub fn Value::number_value(Self, @xml.Document) -> Double
+pub fn Value::of_boolean(Bool) -> Self
+pub fn Value::of_number(Double) -> Self
+pub fn Value::of_string(String) -> Self
 pub fn Value::string_value(Self, @xml.Document) -> String
 
 // Type aliases

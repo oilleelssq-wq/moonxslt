@@ -71,7 +71,7 @@ pub fn Document::set_element_name(Self, Int32, String, String, String) -> Unit
 pub fn Document::set_root(Self, Int32) -> Unit
 pub fn Document::sort_document_order(Self, Array[Int32]) -> Array[Int32]
 pub fn Document::text_content(Self, Int32) -> String
-pub fn Document::to_xml(Self, indent? : Bool) -> String
+pub fn Document::to_xml(Self, indent? : Bool, declaration? : Bool) -> String
 pub fn Document::value(Self, Int32) -> String
 pub fn Document::write_node(Self, Int32, StringBuilder, Bool, Int32) -> Unit
 

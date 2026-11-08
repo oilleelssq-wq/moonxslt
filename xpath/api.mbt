@@ -96,3 +96,39 @@ pub fn select_boolean(
     Err(message) => Err(message)
   }
 }
+
+///|
+/// The XPath string() of an already parsed expression.
+pub fn string_of(
+  context : EvalContext,
+  expression : Expr,
+) -> Result[String, String] {
+  match evaluate_with(context, expression) {
+    Ok(value) => Ok(value.string_value(context.doc))
+    Err(message) => Err(message)
+  }
+}
+
+///|
+/// The XPath number conversion of an already parsed expression.
+pub fn number_of(
+  context : EvalContext,
+  expression : Expr,
+) -> Result[Double, String] {
+  match evaluate_with(context, expression) {
+    Ok(value) => Ok(value.number_value(context.doc))
+    Err(message) => Err(message)
+  }
+}
+
+///|
+/// The XPath boolean conversion of an already parsed expression.
+pub fn boolean_of(
+  context : EvalContext,
+  expression : Expr,
+) -> Result[Bool, String] {
+  match evaluate_with(context, expression) {
+    Ok(value) => Ok(value.boolean_value())
+    Err(message) => Err(message)
+  }
+}
