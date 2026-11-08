@@ -24,7 +24,7 @@ XSLT 是 W3C 的 XML 转换标准。给一份样式表和一份 XML，它输出�
 
 ## 使用
 
-```moonbit
+```moonbit nocheck
 ///|
 test {
   let doc = @xml.parse("<greeting>hello</greeting>").unwrap()

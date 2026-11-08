@@ -1,0 +1,6 @@
+import {
+  "moonbitlang/core/double",
+  "oilleelssq-wq/moonxslt/xml",
+}
+
+pkgtype(kind: "library")

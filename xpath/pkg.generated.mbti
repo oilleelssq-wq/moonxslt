@@ -1,0 +1,198 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "oilleelssq-wq/moonxslt/xpath"
+
+import {
+  "oilleelssq-wq/moonxslt/xml",
+}
+
+// Values
+pub fn evaluate(Expr, EvalContext) -> Value raise EvaluationError
+
+pub fn evaluate_path(@xml.Document, Int32, String) -> Result[Value, String]
+
+pub fn evaluate_with(EvalContext, Expr) -> Result[Value, String]
+
+pub fn format_number(Double) -> String
+
+pub fn matches_node_test(@xml.Document, Int32, Axis, NodeTest, Array[(String, String)]) -> Bool
+
+pub fn nan() -> Double
+
+pub fn of_boolean(Bool) -> Value
+
+pub fn of_number(Double) -> Value
+
+pub fn of_string(String) -> Value
+
+pub fn parse(String) -> Result[Expr, ParseErrorInfo]
+
+pub fn parse_expression(String) -> Expr raise ParseError
+
+pub fn parse_number(String) -> Double
+
+pub fn select(@xml.Document, Int32, String) -> Result[NodeSet, String]
+
+pub fn select_boolean(@xml.Document, Int32, String) -> Result[Bool, String]
+
+pub fn select_nodes(EvalContext, Expr) -> Result[NodeSet, String]
+
+pub fn select_number(@xml.Document, Int32, String) -> Result[Double, String]
+
+pub fn select_string(@xml.Document, Int32, String) -> Result[String, String]
+
+pub fn string_of_node(@xml.Document, Int32) -> String
+
+pub fn tokenize(String) -> Array[Token]
+
+// Errors
+pub suberror EvaluationError {
+  Message(String)
+}
+
+pub suberror ParseError {
+  Syntax(String, Int32)
+}
+
+// Types and methods
+pub(all) enum ArithmeticOp {
+  Add
+  Subtract
+  Multiply
+  Divide
+  Modulo
+}
+
+pub(all) enum Axis {
+  Ancestor
+  AncestorOrSelf
+  Attribute
+  Child
+  Descendant
+  DescendantOrSelf
+  Following
+  FollowingSibling
+  Namespace
+  Parent
+  Preceding
+  PrecedingSibling
+  Self
+}
+
+pub(all) enum ComparisonOp {
+  Equal
+  NotEqual
+  Less
+  LessOrEqual
+  Greater
+  GreaterOrEqual
+}
+
+pub struct EvalContext {
+  doc : @xml.Document
+  node : Int32
+  position : Int32
+  size : Int32
+  variables : Array[(String, Value)]
+  namespaces : Array[(String, String)]
+}
+pub fn EvalContext::new(@xml.Document, Int32) -> Self
+pub fn EvalContext::with_namespaces(Self, Array[(String, String)]) -> Self
+pub fn EvalContext::with_node(Self, Int32) -> Self
+pub fn EvalContext::with_variables(Self, Array[(String, Value)]) -> Self
+
+pub(all) enum Expr {
+  LocationPath(Bool, Array[Step])
+  Filter(Expr, Array[Expr])
+  Path(Expr, Array[Step])
+  Union(Expr, Expr)
+  Or(Expr, Expr)
+  And(Expr, Expr)
+  Comparison(ComparisonOp, Expr, Expr)
+  Arithmetic(ArithmeticOp, Expr, Expr)
+  Negate(Expr)
+  NumberLiteral(Double)
+  StringLiteral(String)
+  VariableReference(String)
+  FunctionCall(String, Array[Expr])
+}
+
+pub struct NodeSet {
+  nodes : Array[Int32]
+}
+pub fn NodeSet::contains(Self, Int32) -> Bool
+pub fn NodeSet::empty() -> Self
+pub fn NodeSet::first(Self) -> Int32?
+pub fn NodeSet::is_empty(Self) -> Bool
+pub fn NodeSet::length(Self) -> Int32
+pub fn NodeSet::new(@xml.Document, Array[Int32]) -> Self
+pub fn NodeSet::nodes(Self) -> ArrayView[Int32]
+pub fn NodeSet::union(Self, @xml.Document, Self) -> Self
+
+pub(all) enum NodeTest {
+  NameTest(String, String)
+  TextTest
+  CommentTest
+  AnyNodeTest
+  ProcessingInstructionTest(String?)
+}
+
+pub(all) struct ParseErrorInfo {
+  message : String
+  position : Int32
+}
+
+pub(all) enum Step {
+  AxisStep(Axis, NodeTest, Array[Expr])
+  SelfStep
+  ParentStep
+}
+
+pub struct Token {
+  kind : TokenKind
+  text : String
+  position : Int32
+}
+pub fn Token::describe(Self) -> String
+
+pub(all) enum TokenKind {
+  Name
+  Number
+  Literal
+  Slash
+  DoubleSlash
+  Dot
+  DotDot
+  At
+  LeftParen
+  RightParen
+  LeftBracket
+  RightBracket
+  Comma
+  ColonColon
+  Pipe
+  Plus
+  Minus
+  Star
+  Equal
+  NotEqual
+  Less
+  LessOrEqual
+  Greater
+  GreaterOrEqual
+  Dollar
+  Eof
+}
+
+pub(all) enum Value {
+  Nodes(NodeSet)
+  Boolean(Bool)
+  Number(Double)
+  String(String)
+}
+pub fn Value::boolean_value(Self) -> Bool
+pub fn Value::number_value(Self, @xml.Document) -> Double
+pub fn Value::string_value(Self, @xml.Document) -> String
+
+// Type aliases
+
+// Traits
