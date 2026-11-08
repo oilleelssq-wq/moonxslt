@@ -1,0 +1,5 @@
+// import {
+//   "oilleelssq-wq/moonxslt" @lib,
+// }
+
+pkgtype(kind: "executable")

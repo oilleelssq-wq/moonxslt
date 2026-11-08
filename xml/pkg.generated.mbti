@@ -1,0 +1,91 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "oilleelssq-wq/moonxslt/xml"
+
+// Values
+pub fn escape_attribute(String) -> String
+
+pub fn escape_text(String) -> String
+
+pub fn is_xml_whitespace(Char) -> Bool
+
+pub fn parse(String) -> Result[Document, XmlErrorInfo]
+
+pub fn parse_or_raise(String) -> Document raise XmlError
+
+pub fn split_qname(String) -> (String, String)?
+
+// Errors
+pub suberror XmlError {
+  Parse(String, Int32, Int32)
+}
+
+// Types and methods
+pub struct Document {
+  nodes : Array[Node]
+  mut root_id : Int32?
+}
+pub fn Document::add_attribute(Self, Int32, QName, String) -> Int32
+pub fn Document::add_comment(Self, Int32, String) -> Int32
+pub fn Document::add_element(Self, Int32, QName) -> Int32
+pub fn Document::add_processing_instruction(Self, Int32, String, String) -> Int32
+pub fn Document::add_text(Self, Int32, String) -> Int32
+pub fn Document::attribute_by_expanded(Self, Int32, String, String) -> Int32?
+pub fn Document::attribute_by_local(Self, Int32, String) -> Int32?
+pub fn Document::attribute_value(Self, Int32, String) -> String?
+pub fn Document::attributes(Self, Int32) -> ArrayView[Int32]
+pub fn Document::children(Self, Int32) -> ArrayView[Int32]
+pub fn Document::compare_order(Self, Int32, Int32) -> Int32
+pub fn Document::declare_namespace(Self, Int32, String, String) -> Unit
+pub fn Document::document_order(Self, Int32) -> Int32
+pub fn Document::empty() -> Self
+pub fn Document::has_children(Self, Int32) -> Bool
+pub fn Document::is_whitespace_text(Self, Int32) -> Bool
+pub fn Document::kind(Self, Int32) -> NodeKind?
+pub fn Document::local_name(Self, Int32) -> String
+pub fn Document::name(Self, Int32) -> QName?
+pub fn Document::namespace_declarations(Self, Int32) -> ArrayView[(String, String)]
+pub fn Document::namespace_uri(Self, Int32) -> String
+pub fn Document::node_count(Self) -> Int32
+pub fn Document::parent(Self, Int32) -> Int32?
+pub fn Document::qualified_name(Self, Int32) -> String
+pub fn Document::resolve_prefix(Self, Int32, String) -> String?
+pub fn Document::root(Self) -> Int32?
+pub fn Document::set_element_name(Self, Int32, String, String, String) -> Unit
+pub fn Document::set_root(Self, Int32) -> Unit
+pub fn Document::text_content(Self, Int32) -> String
+pub fn Document::to_xml(Self, indent? : Bool) -> String
+pub fn Document::value(Self, Int32) -> String
+pub fn Document::write_node(Self, Int32, StringBuilder, Bool, Int32) -> Unit
+
+type Node
+
+pub(all) enum NodeKind {
+  Document
+  Element
+  Attribute
+  Text
+  Comment
+  ProcessingInstruction
+}
+
+pub struct QName {
+  prefix : String
+  local_part : String
+  uri : String
+}
+pub fn QName::expanded(Self) -> String
+pub fn QName::local_part(Self) -> String
+pub fn QName::new(String, String, String) -> Self
+pub fn QName::prefix(Self) -> String
+pub fn QName::qualified(Self) -> String
+pub fn QName::uri(Self) -> String
+
+pub(all) struct XmlErrorInfo {
+  message : String
+  line : Int32
+  column : Int32
+}
+
+// Type aliases
+
+// Traits
