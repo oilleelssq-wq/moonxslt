@@ -310,5 +310,5 @@ test "applies location steps after a filter expression" {
     context,
     @xpath.parse("(//book)[2]/title").unwrap(),
   ).unwrap()
-  assert_eq(texts(doc, titles.nodes().to_array()), ["B"])
+  assert_eq(texts(doc, titles.nodes().to_owned()), ["B"])
 }
