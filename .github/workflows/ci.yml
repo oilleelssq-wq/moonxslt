@@ -43,5 +43,9 @@ jobs:
           moon info
           git diff --exit-code -- '*.mbti'
 
-      - name: Run the command line example
-        run: moon run cmd/main examples/books/books.xsl examples/books/books.xml
+      - name: Run the command line examples
+        run: |
+          moon run cmd/main examples/books/books.xsl examples/books/books.xml
+          moon run cmd/main examples/html/books.xsl examples/books/books.xml
+          moon run cmd/main examples/identity/identity.xsl examples/books/books.xml
+          moon run cmd/main examples/report/report.xsl examples/report/sales.xml
