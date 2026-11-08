@@ -22,6 +22,8 @@ pub fn run(Stylesheet, @xml.Document) -> Result[@xml.Document, String]
 
 pub fn serialise(@xml.Document, Stylesheet) -> String
 
+pub fn serialise_html(@xml.Document) -> String
+
 pub fn split_pattern_alternatives(String) -> Array[String]
 
 pub fn transform(String, String) -> Result[String, String]

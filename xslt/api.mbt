@@ -24,12 +24,7 @@ pub fn transform(
     Ok(doc) => doc
     Err(message) => return Err(message)
   }
-  Ok(
-    result.to_xml(
-      indent=stylesheet.indents(),
-      declaration=!stylesheet.omits_xml_declaration(),
-    ),
-  )
+  Ok(serialise(result, stylesheet))
 }
 
 ///|
@@ -56,8 +51,13 @@ pub fn compile_stylesheet(
 ///|
 /// Serialise a result tree with the settings of a compiled stylesheet.
 pub fn serialise(result : @xml.Document, stylesheet : Stylesheet) -> String {
-  result.to_xml(
-    indent=stylesheet.indents(),
-    declaration=!stylesheet.omits_xml_declaration(),
-  )
+  match stylesheet.output_method() {
+    "text" => result.text_content(0)
+    "html" => serialise_html(result)
+    _ =>
+      result.to_xml(
+        indent=stylesheet.indents(),
+        declaration=!stylesheet.omits_xml_declaration(),
+      )
+  }
 }

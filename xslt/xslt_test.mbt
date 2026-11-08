@@ -173,3 +173,23 @@ test "copies namespace declarations with copied elements" {
   assert_true(result.contains("xmlns:ns=\"urn:x\""))
   assert_true(result.contains("<ns:b"))
 }
+
+///|
+test "serialises the text output method without markup" {
+  let stylesheet = "<xsl:stylesheet version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:output method='text'/><xsl:template match='/'><out>Hello <xsl:value-of select='//n'/></out></xsl:template></xsl:stylesheet>"
+  let result = match @xslt.transform("<r><n>7</n></r>", stylesheet) {
+    Ok(text) => text
+    Err(message) => abort(message)
+  }
+  assert_eq(result, "Hello 7")
+}
+
+///|
+test "serialises the HTML output method without self-closing voids" {
+  let stylesheet = "<xsl:stylesheet version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:output method='html'/><xsl:template match='/'><html><body><br/><hr/></body></html></xsl:template></xsl:stylesheet>"
+  let result = match @xslt.transform("<r/>", stylesheet) {
+    Ok(text) => text
+    Err(message) => abort(message)
+  }
+  assert_eq(result, "<html><body><br><hr></body></html>")
+}
