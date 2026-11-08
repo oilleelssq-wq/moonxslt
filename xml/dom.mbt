@@ -106,6 +106,7 @@ struct Node {
   children : Array[Int32]
   parent : Int32
   ns_decls : Array[(String, String)]
+  escape : Bool
   order : Int32
 }
 
@@ -127,6 +128,7 @@ pub fn Document::empty() -> Document {
     children: [],
     parent: -1,
     ns_decls: [],
+    escape: true,
     order: 0,
   }
   { nodes: [document_node], root_id: None, }
@@ -398,6 +400,7 @@ pub fn Document::add_element(
     children: [],
     parent,
     ns_decls: [],
+    escape: true,
     order: self.nodes.length(),
   })
 }
@@ -412,14 +415,36 @@ pub fn Document::add_text(
   parent : Int32,
   text : String,
 ) -> Int32 {
+  self.add_text_node(parent, text, true)
+}
+
+///|
+/// Append a text node whose content is written without escaping, for
+/// disable-output-escaping="yes".
+pub fn Document::add_raw_text(
+  self : Document,
+  parent : Int32,
+  text : String,
+) -> Int32 {
+  self.add_text_node(parent, text, false)
+}
+
+///|
+fn Document::add_text_node(
+  self : Document,
+  parent : Int32,
+  text : String,
+  escape : Bool,
+) -> Int32 {
   let children = self.nodes[parent].children
   if children.length() > 0 {
     let last = children[children.length() - 1]
     match self.nodes[last].kind {
-      Text => {
-        self.nodes[last].value = self.nodes[last].value + text
-        return last
-      }
+      Text =>
+        if self.nodes[last].escape == escape {
+          self.nodes[last].value = self.nodes[last].value + text
+          return last
+        }
       _ => ()
     }
   }
@@ -431,8 +456,15 @@ pub fn Document::add_text(
     children: [],
     parent,
     ns_decls: [],
+    escape,
     order: self.nodes.length(),
   })
+}
+
+///|
+/// Whether the content of a text node is escaped on output.
+pub fn Document::is_escaped_text(self : Document, id : Int32) -> Bool {
+  self.nodes[id].escape
 }
 
 ///|
@@ -450,6 +482,7 @@ pub fn Document::add_comment(
     children: [],
     parent,
     ns_decls: [],
+    escape: true,
     order: self.nodes.length(),
   })
 }
@@ -470,6 +503,7 @@ pub fn Document::add_processing_instruction(
     children: [],
     parent,
     ns_decls: [],
+    escape: true,
     order: self.nodes.length(),
   })
 }
@@ -495,6 +529,7 @@ pub fn Document::add_attribute(
     children: [],
     parent: element,
     ns_decls: [],
+    escape: true,
     order,
   })
   self.nodes[element].attrs.push(id)

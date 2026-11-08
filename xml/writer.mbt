@@ -35,7 +35,12 @@ pub fn Document::write_node(
 ) -> Unit {
   match self.kind(id) {
     Some(Element) => self.write_element(id, sb, indent, depth)
-    Some(Text) => sb.write_string(escape_text(self.value(id)))
+    Some(Text) =>
+      if self.is_escaped_text(id) {
+        sb.write_string(escape_text(self.value(id)))
+      } else {
+        sb.write_string(self.value(id))
+      }
     Some(Comment) => {
       sb.write_string("<!--")
       sb.write_string(self.value(id))

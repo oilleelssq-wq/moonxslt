@@ -28,6 +28,7 @@ pub fn Document::add_attribute(Self, Int32, QName, String) -> Int32
 pub fn Document::add_comment(Self, Int32, String) -> Int32
 pub fn Document::add_element(Self, Int32, QName) -> Int32
 pub fn Document::add_processing_instruction(Self, Int32, String, String) -> Int32
+pub fn Document::add_raw_text(Self, Int32, String) -> Int32
 pub fn Document::add_text(Self, Int32, String) -> Int32
 pub fn Document::ancestors(Self, Int32) -> Array[Int32]
 pub fn Document::ancestors_or_self(Self, Int32) -> Array[Int32]
@@ -50,6 +51,7 @@ pub fn Document::is_attribute(Self, Int32) -> Bool
 pub fn Document::is_comment(Self, Int32) -> Bool
 pub fn Document::is_document_node(Self, Int32) -> Bool
 pub fn Document::is_element(Self, Int32) -> Bool
+pub fn Document::is_escaped_text(Self, Int32) -> Bool
 pub fn Document::is_processing_instruction(Self, Int32) -> Bool
 pub fn Document::is_text(Self, Int32) -> Bool
 pub fn Document::is_whitespace_text(Self, Int32) -> Bool

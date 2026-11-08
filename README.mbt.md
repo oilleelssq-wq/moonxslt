@@ -59,7 +59,7 @@ moon run cmd/main examples/html/books.xsl examples/books/books.xml
 | `xslt` | 模板匹配与优先级、`mode`、内置模板规则、属性值模板、`xsl:value-of`、`xsl:apply-templates`、`xsl:call-template`/`xsl:with-param`、`xsl:variable`/`xsl:param`、`xsl:if`、`xsl:choose`、`xsl:for-each`、`xsl:sort`、`xsl:copy`/`xsl:copy-of`、`xsl:element`/`xsl:attribute`、`xsl:comment`、`xsl:processing-instruction`、`xsl:text`、`xsl:number`、`xsl:message`、`xsl:strip-space`/`xsl:preserve-space`、`format-number`/`xsl:decimal-format`；xml / html / text 三种输出方法 |
 | CLI | `moonxslt <stylesheet> <source> [output]` |
 
-测试共 81 个，覆盖解析、XPath 求值、模板选择、变量作用域、动态构造、编号、键索引与序列化。
+测试共 85 个，覆盖解析、XPath 求值、模板选择、变量作用域、动态构造、编号、键索引、转义控制与序列化。
 
 ## 文档模型
 

@@ -22,7 +22,11 @@ fn write_html_node(
   sb : StringBuilder,
 ) -> Unit {
   if doc.is_text(node) {
-    write_escaped_text(doc.value(node), sb)
+    if doc.is_escaped_text(node) {
+      write_escaped_text(doc.value(node), sb)
+    } else {
+      sb.write_string(doc.value(node))
+    }
   } else if doc.is_comment(node) {
     sb.write_string("<!--")
     sb.write_string(doc.value(node))

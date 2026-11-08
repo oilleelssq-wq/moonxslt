@@ -366,7 +366,11 @@ fn Transformer::instruction(
     "value-of" => {
       let select = self.required_attribute(element, "select")
       let text = self.evaluate_string(select, element)
-      let _ = self.result.add_text(output_parent, text)
+      if self.disables_output_escaping(element) {
+        let _ = self.result.add_raw_text(output_parent, text)
+      } else {
+        let _ = self.result.add_text(output_parent, text)
+      }
     }
     "apply-templates" => {
       let select = match self.style.doc.attribute_value(element, "select") {
@@ -456,7 +460,11 @@ fn Transformer::instruction(
           sb.write_string(self.style.doc.value(child))
         }
       }
-      let _ = self.result.add_text(output_parent, sb.to_string())
+      if self.disables_output_escaping(element) {
+        let _ = self.result.add_raw_text(output_parent, sb.to_string())
+      } else {
+        let _ = self.result.add_text(output_parent, sb.to_string())
+      }
     }
     "comment" => {
       let text = self.instantiate_text(element)
@@ -1119,6 +1127,18 @@ fn Transformer::should_strip(self : Transformer, node : Int32) -> Bool {
     None => return false
   }
   self.style.strips_element(name)
+}
+
+///|
+/// Whether an instruction sets disable-output-escaping="yes".
+fn Transformer::disables_output_escaping(
+  self : Transformer,
+  element : Int32,
+) -> Bool {
+  match self.style.doc.attribute_value(element, "disable-output-escaping") {
+    Some(value) => value == "yes"
+    None => false
+  }
 }
 
 ///|
