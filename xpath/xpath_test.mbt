@@ -297,3 +297,18 @@ test "formats numbers like XPath" {
   assert_eq(@xpath.format_number(-0.0), "0")
   assert_true(@xpath.format_number(@xpath.nan()) == "NaN")
 }
+
+///|
+test "applies location steps after a filter expression" {
+  let doc = load(
+    "<catalog><book><title>A</title></book><book><title>B</title></book></catalog>",
+  )
+  let context = @xpath.EvalContext::new(doc, 0)
+  let title = @xpath.select_string(doc, 0, "(//book)[1]/title").unwrap()
+  assert_eq(title, "A")
+  let titles = @xpath.select_nodes(
+    context,
+    @xpath.parse("(//book)[2]/title").unwrap(),
+  ).unwrap()
+  assert_eq(texts(doc, titles.nodes().to_array()), ["B"])
+}

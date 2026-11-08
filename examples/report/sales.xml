@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sales>
+  <sale region="north" amount="1200.5"/>
+  <sale region="south" amount="830"/>
+  <sale region="north" amount="450.25"/>
+  <sale region="east" amount="1020"/>
+  <sale region="south" amount="75"/>
+</sales>

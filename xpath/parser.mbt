@@ -284,8 +284,17 @@ fn Parser::parse_path_expr(self : Parser) -> Expr raise ParseError {
   }
   if self.starts_primary() {
     let primary = self.parse_filter_expr()
-    if self.at("slash") || self.at("double_slash") {
+    if self.at("slash") {
+      self.advance() |> ignore_token
       let steps = self.parse_relative_steps()
+      return Path(primary, steps)
+    }
+    if self.at("double_slash") {
+      self.advance() |> ignore_token
+      let steps : Array[Step] = [AxisStep(DescendantOrSelf, AnyNodeTest, [])]
+      for step in self.parse_relative_steps() {
+        steps.push(step)
+      }
       return Path(primary, steps)
     }
     return primary
