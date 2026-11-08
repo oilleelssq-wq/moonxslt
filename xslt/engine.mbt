@@ -933,9 +933,6 @@ fn Transformer::copy_current(
       self.result.declare_namespace(copy, declaration.0, declaration.1)
     }
     self.ensure_namespace_declared(copy, name.prefix(), name.uri())
-    for attribute in self.source.attributes(node) {
-      self.copy_attribute(attribute, copy)
-    }
     self.instantiate(element, copy)
     return
   }

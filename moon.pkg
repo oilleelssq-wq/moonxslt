@@ -1,1 +1,7 @@
+import {
+  "oilleelssq-wq/moonxslt/xml",
+  "oilleelssq-wq/moonxslt/xpath",
+  "oilleelssq-wq/moonxslt/xslt",
+}
 
+pkgtype(kind: "library")

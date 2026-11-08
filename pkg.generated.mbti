@@ -1,7 +1,19 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "oilleelssq-wq/moonxslt"
 
+import {
+  "oilleelssq-wq/moonxslt/xml",
+  "oilleelssq-wq/moonxslt/xpath",
+}
+
 // Values
+pub fn parse_xml(String) -> Result[@xml.Document, String]
+
+pub fn select(@xml.Document, String) -> Result[@xpath.NodeSet, String]
+
+pub fn select_string(@xml.Document, String) -> Result[String, String]
+
+pub fn transform(String, String) -> Result[String, String]
 
 // Errors
 

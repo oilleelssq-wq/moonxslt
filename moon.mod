@@ -13,3 +13,7 @@ keywords = [ "xslt", "xpath", "xml", "transform", "stylesheet" ]
 preferred_target = "wasm"
 
 description = "A pure MoonBit XSLT 1.0 processor with its own XML parser and XPath 1.0 engine."
+
+import {
+  "moonbitlang/x@0.5.7",
+}

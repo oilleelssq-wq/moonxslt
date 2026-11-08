@@ -163,7 +163,7 @@ test "constructs elements and attributes dynamically" {
 test "shallow-copies the current node with copy" {
   let body = "<xsl:template match='/'><out><xsl:apply-templates select='//item'/></out></xsl:template><xsl:template match='item'><xsl:copy><xsl:value-of select='@x'/></xsl:copy></xsl:template>"
   let result = transform("<r><item x='9'>old</item></r>", body)
-  assert_eq(result, "<out><item x=\"9\">9</item></out>")
+  assert_eq(result, "<out><item>9</item></out>")
 }
 
 ///|
@@ -192,4 +192,11 @@ test "serialises the HTML output method without self-closing voids" {
     Err(message) => abort(message)
   }
   assert_eq(result, "<html><body><br><hr></body></html>")
+}
+
+///|
+test "identity transform preserves attributes and nesting" {
+  let body = "<xsl:template match='@*|node()'><xsl:copy><xsl:apply-templates select='@*|node()'/></xsl:copy></xsl:template>"
+  let result = transform("<r a='1'><b>t</b></r>", body)
+  assert_eq(result, "<r a=\"1\"><b>t</b></r>")
 }

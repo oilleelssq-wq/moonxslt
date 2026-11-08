@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog>
+  <book id="b1" year="2021">
+    <title>MoonBit in Action</title>
+    <author>Li Wei</author>
+    <price>59.00</price>
+  </book>
+  <book id="b2" year="2023">
+    <title>Data Processing with MoonBit</title>
+    <author>Chen Yu</author>
+    <price>42.50</price>
+  </book>
+  <book id="b3" year="2022">
+    <title>Compiler Construction</title>
+    <author>Wang Fang</author>
+    <price>88.00</price>
+  </book>
+</catalog>

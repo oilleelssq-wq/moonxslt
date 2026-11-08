@@ -1,5 +1,7 @@
-// import {
-//   "oilleelssq-wq/moonxslt" @lib,
-// }
+import {
+  "moonbitlang/core/env",
+  "moonbitlang/x/fs",
+  "oilleelssq-wq/moonxslt/xslt",
+}
 
 pkgtype(kind: "executable")
