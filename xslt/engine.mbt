@@ -103,6 +103,24 @@ fn Transformer::context(
   .with_position(self.current_position, self.current_size)
   .with_variables(self.variables)
   .with_namespaces(in_scope_namespaces(self.style.doc, style_element))
+  .with_function("format-number", (arguments, eval_context) => {
+    if arguments.length() < 2 {
+      @xpath.raise_function_error(
+        "format-number() expects two or three arguments",
+      )
+    }
+    let doc = eval_context.document()
+    let number = @xpath.evaluate(arguments[0], eval_context).number_value(doc)
+    let pattern = @xpath.evaluate(arguments[1], eval_context).string_value(doc)
+    let format_name = if arguments.length() >= 3 {
+      @xpath.evaluate(arguments[2], eval_context).string_value(doc)
+    } else {
+      ""
+    }
+    @xpath.Value::of_string(
+      format_number(number, pattern, self.style.decimal_format(format_name)),
+    )
+  })
 }
 
 // ---------------------------------------------------------------------------

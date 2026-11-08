@@ -78,6 +78,6 @@ CI 在 Ubuntu 上安装 MoonBit 工具链，跑 `moon check --deny-warn`、`moon
 | 5 | copy/copy-of、element/attribute | 完成 |
 | 6 | 输出方法与空白剥离 | 完成 |
 | 7 | 编号与消息 | 完成 |
-| 8 | format-number、decimal-format | 计划 |
+| 8 | format-number、decimal-format | 完成 |
 | 9 | key()、document()、import/include | 计划 |
 | 10 | 发布到 mooncakes.io | 待发布 |

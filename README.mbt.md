@@ -56,10 +56,10 @@ moon run cmd/main examples/html/books.xsl examples/books/books.xml
 | --- | --- |
 | `xml` | 命名空间感知的文档模型、递归下降解析器（CDATA、注释、处理指令、预定义实体与数字字符引用）、XML 序列化 |
 | `xpath` | XPath 1.0 词法/语法/求值；全部 13 个轴、缩写语法、谓词、并集、比较、算术；核心函数库（`concat`、`substring`、`translate`、`normalize-space`、`sum`、`id`、`lang` 等） |
-| `xslt` | 模板匹配与优先级、`mode`、内置模板规则、属性值模板、`xsl:value-of`、`xsl:apply-templates`、`xsl:call-template`/`xsl:with-param`、`xsl:variable`/`xsl:param`、`xsl:if`、`xsl:choose`、`xsl:for-each`、`xsl:sort`、`xsl:copy`/`xsl:copy-of`、`xsl:element`/`xsl:attribute`、`xsl:comment`、`xsl:processing-instruction`、`xsl:text`；xml / html / text 三种输出方法 |
+| `xslt` | 模板匹配与优先级、`mode`、内置模板规则、属性值模板、`xsl:value-of`、`xsl:apply-templates`、`xsl:call-template`/`xsl:with-param`、`xsl:variable`/`xsl:param`、`xsl:if`、`xsl:choose`、`xsl:for-each`、`xsl:sort`、`xsl:copy`/`xsl:copy-of`、`xsl:element`/`xsl:attribute`、`xsl:comment`、`xsl:processing-instruction`、`xsl:text`、`xsl:number`、`xsl:message`、`xsl:strip-space`/`xsl:preserve-space`、`format-number`/`xsl:decimal-format`；xml / html / text 三种输出方法 |
 | CLI | `moonxslt <stylesheet> <source> [output]` |
 
-测试共 70 个，覆盖解析、XPath 求值、模板选择、变量作用域、动态构造、编号与序列化。
+测试共 77 个，覆盖解析、XPath 求值、模板选择、变量作用域、动态构造、编号与序列化。
 
 ## 文档模型
 
@@ -81,11 +81,12 @@ moon run cmd/main examples/html/books.xsl examples/books/books.xml
 
 ## 已知限制
 
-- `xsl:number`、`format-number`、`decimal-format` 尚未实现。
 - `key()`、`document()`、`xsl:import`/`xsl:include` 尚未实现。
 - `disable-output-escaping` 属性被忽略。
 - `xsl:param` 只按名字查找是否已有绑定，外层同名变量会被误当成已传入的参数。
-- `xsl:strip-space`、`xsl:preserve-space` 尚未实现，源文档里的空白文本节点会原样进入结果。
+- 空白剥离只作用于模板处理：显式写 `//text()` 的 XPath 表达式仍能看到被剥离的空白文本节点。
+- `xsl:number` 的 `count` 只支持名字测试与 `*`，不支持带谓词或并集的模式。
+- `format-number` 只支持定点图片串，科学计数法等写法会原样返回。
 - 解析器跳过 DOCTYPE 内部子集，不展开自定义实体，只支持五个预定义实体与数字字符引用。
 
 ## 许可证

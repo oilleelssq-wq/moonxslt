@@ -8,7 +8,7 @@
         <xsl:value-of select="count(//book)"/>
       </count>
       <total>
-        <xsl:value-of select="sum(//price)"/>
+        <xsl:value-of select="format-number(sum(//price), '#,##0.00')"/>
       </total>
       <books>
         <xsl:apply-templates select="//book">

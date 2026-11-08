@@ -21,12 +21,23 @@ pub struct EvalContext {
   size : Int32
   variables : Array[(String, Value)]
   namespaces : Array[(String, String)]
+  user_functions : Array[
+    (String, (Array[Expr], EvalContext) -> Value raise EvaluationError),
+  ]
 }
 
 ///|
 /// Create a context for a single node.
 pub fn EvalContext::new(doc : @xml.Document, node : Int32) -> EvalContext {
-  { doc, node, position: 1, size: 1, variables: [], namespaces: [], }
+  {
+    doc,
+    node,
+    position: 1,
+    size: 1,
+    variables: [],
+    namespaces: [],
+    user_functions: [],
+  }
 }
 
 ///|
@@ -42,6 +53,7 @@ pub fn EvalContext::with_variables(
     size: self.size,
     variables,
     namespaces: self.namespaces,
+    user_functions: self.user_functions,
   }
 }
 
@@ -58,6 +70,7 @@ pub fn EvalContext::with_namespaces(
     size: self.size,
     variables: self.variables,
     namespaces,
+    user_functions: self.user_functions,
   }
 }
 
@@ -71,6 +84,32 @@ pub fn EvalContext::with_node(self : EvalContext, node : Int32) -> EvalContext {
     size: 1,
     variables: self.variables,
     namespaces: self.namespaces,
+    user_functions: self.user_functions,
+  }
+}
+
+///|
+/// Return a copy of the context with an extra function implementation.
+pub fn EvalContext::with_function(
+  self : EvalContext,
+  name : String,
+  function : (Array[Expr], EvalContext) -> Value raise EvaluationError,
+) -> EvalContext {
+  let functions : Array[
+    (String, (Array[Expr], EvalContext) -> Value raise EvaluationError),
+  ] = []
+  for entry in self.user_functions {
+    functions.push(entry)
+  }
+  functions.push((name, function))
+  {
+    doc: self.doc,
+    node: self.node,
+    position: self.position,
+    size: self.size,
+    variables: self.variables,
+    namespaces: self.namespaces,
+    user_functions: functions,
   }
 }
 
@@ -195,6 +234,7 @@ fn apply_predicates(
         size,
         variables: context.variables,
         namespaces: context.namespaces,
+        user_functions: context.user_functions,
       }
       let value = evaluate(predicate, predicate_context)
       let keep = match value {
@@ -630,7 +670,18 @@ fn call_function(
     }
     "true" => Boolean(true)
     "false" => Boolean(false)
-    _ => call_library_function(name, arguments, context)
+    _ => {
+      let mut implemented : Value? = None
+      for entry in context.user_functions {
+        if entry.0 == name {
+          implemented = Some((entry.1)(arguments, context))
+        }
+      }
+      match implemented {
+        Some(value) => value
+        None => call_library_function(name, arguments, context)
+      }
+    }
   }
 }
 
@@ -680,5 +731,18 @@ pub fn EvalContext::with_position(
     size,
     variables: self.variables,
     namespaces: self.namespaces,
+    user_functions: self.user_functions,
   }
+}
+
+///|
+/// The document the context evaluates against.
+pub fn EvalContext::document(self : EvalContext) -> @xml.Document {
+  self.doc
+}
+
+///|
+/// Raise a dynamic evaluation error with the given message.
+pub fn[T] raise_function_error(message : String) -> T raise EvaluationError {
+  raise EvaluationError::Message(message)
 }

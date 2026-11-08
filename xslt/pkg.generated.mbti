@@ -12,7 +12,11 @@ pub fn compile(@xml.Document) -> Result[Stylesheet, String]
 
 pub fn compile_stylesheet(String) -> Result[Stylesheet, String]
 
+pub fn decimal_format_from_element(@xml.Document, Int32) -> DecimalFormat
+
 pub fn default_priority(String) -> Double
+
+pub fn format_number(Double, String, DecimalFormat) -> String
 
 pub fn format_number_value(Int32, String) -> String
 
@@ -38,6 +42,20 @@ pub suberror XsltError {
 }
 
 // Types and methods
+pub struct DecimalFormat {
+  decimal_separator : String
+  grouping_separator : String
+  infinity : String
+  minus_sign : String
+  nan : String
+  percent : String
+  per_mille : String
+  zero_digit : Char
+  digit : Char
+  pattern_separator : String
+}
+pub fn DecimalFormat::default() -> Self
+
 pub struct Stylesheet {
   doc : @xml.Document
   root_element : Int32
@@ -50,7 +68,9 @@ pub struct Stylesheet {
   strip_whitespace : Bool
   strip_names : Array[String]
   preserve_names : Array[String]
+  decimal_formats : Array[(String, DecimalFormat)]
 }
+pub fn Stylesheet::decimal_format(Self, String) -> DecimalFormat
 pub fn Stylesheet::document(Self) -> @xml.Document
 pub fn Stylesheet::indents(Self) -> Bool
 pub fn Stylesheet::named_template(Self, String) -> Template?

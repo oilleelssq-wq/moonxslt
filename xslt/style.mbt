@@ -60,6 +60,7 @@ pub struct Stylesheet {
   strip_whitespace : Bool
   strip_names : Array[String]
   preserve_names : Array[String]
+  decimal_formats : Array[(String, DecimalFormat)]
 }
 
 ///|
@@ -159,6 +160,7 @@ pub fn compile(stylesheet : @xml.Document) -> Result[Stylesheet, String] {
   let mut strip_whitespace = false
   let strip_names : Array[String] = []
   let preserve_names : Array[String] = []
+  let decimal_formats : Array[(String, DecimalFormat)] = []
   for node in stylesheet.descendants(root) {
     if !stylesheet.is_element(node) ||
       stylesheet.namespace_uri(node) != XSLT_NAMESPACE {
@@ -213,6 +215,14 @@ pub fn compile(stylesheet : @xml.Document) -> Result[Stylesheet, String] {
         Some(value) => indent = value == "yes"
         None => ()
       }
+    } else if name == "decimal-format" {
+      let format_name = match stylesheet.attribute_value(node, "name") {
+        Some(format_name) => format_name
+        None => ""
+      }
+      decimal_formats.push(
+        (format_name, decimal_format_from_element(stylesheet, node)),
+      )
     } else if name == "strip-space" || name == "preserve-space" {
       let elements = match stylesheet.attribute_value(node, "elements") {
         Some(value) => value
@@ -247,6 +257,7 @@ pub fn compile(stylesheet : @xml.Document) -> Result[Stylesheet, String] {
     strip_whitespace,
     strip_names,
     preserve_names,
+    decimal_formats,
   })
 }
 
@@ -444,4 +455,18 @@ fn split_on_whitespace(text : String) -> Array[String] {
     parts.push(sb.to_string())
   }
   parts
+}
+
+///|
+/// The decimal format with the given name, or the default format.
+pub fn Stylesheet::decimal_format(
+  self : Stylesheet,
+  name : String,
+) -> DecimalFormat {
+  for entry in self.decimal_formats {
+    if entry.0 == name {
+      return entry.1
+    }
+  }
+  DecimalFormat::default()
 }

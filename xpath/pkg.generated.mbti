@@ -34,6 +34,8 @@ pub fn parse_expression(String) -> Expr raise ParseError
 
 pub fn parse_number(String) -> Double
 
+pub fn[T] raise_function_error(String) -> T raise EvaluationError
+
 pub fn select(@xml.Document, Int32, String) -> Result[NodeSet, String]
 
 pub fn select_boolean(@xml.Document, Int32, String) -> Result[Bool, String]
@@ -100,8 +102,11 @@ pub struct EvalContext {
   size : Int32
   variables : Array[(String, Value)]
   namespaces : Array[(String, String)]
+  user_functions : Array[(String, (Array[Expr], EvalContext) -> Value raise EvaluationError)]
 }
+pub fn EvalContext::document(Self) -> @xml.Document
 pub fn EvalContext::new(@xml.Document, Int32) -> Self
+pub fn EvalContext::with_function(Self, String, (Array[Expr], Self) -> Value raise EvaluationError) -> Self
 pub fn EvalContext::with_namespaces(Self, Array[(String, String)]) -> Self
 pub fn EvalContext::with_node(Self, Int32) -> Self
 pub fn EvalContext::with_position(Self, Int32, Int32) -> Self
