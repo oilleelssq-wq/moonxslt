@@ -57,6 +57,9 @@ pub struct Stylesheet {
   serialization_method : String
   omit_xml_declaration : Bool
   indent : Bool
+  strip_whitespace : Bool
+  strip_names : Array[String]
+  preserve_names : Array[String]
 }
 
 ///|
@@ -96,6 +99,34 @@ pub fn Stylesheet::indents(self : Stylesheet) -> Bool {
 }
 
 ///|
+/// Whether whitespace-only text nodes should be stripped from the source.
+pub fn Stylesheet::strips_whitespace(self : Stylesheet) -> Bool {
+  self.strip_whitespace
+}
+
+///|
+/// Whether the whitespace-only text children of an element are stripped.
+///
+/// An xsl:preserve-space declaration wins over xsl:strip-space, as the
+/// specification requires.
+pub fn Stylesheet::strips_element(self : Stylesheet, name : String) -> Bool {
+  for preserved in self.preserve_names {
+    if preserved == name {
+      return false
+    }
+  }
+  if self.strip_whitespace {
+    return true
+  }
+  for stripped in self.strip_names {
+    if stripped == name {
+      return true
+    }
+  }
+  false
+}
+
+///|
 /// Compile a stylesheet document.
 pub fn compile(stylesheet : @xml.Document) -> Result[Stylesheet, String] {
   let root = match stylesheet.root() {
@@ -125,6 +156,9 @@ pub fn compile(stylesheet : @xml.Document) -> Result[Stylesheet, String] {
   let mut serialization_method = "xml"
   let mut omit_declaration = false
   let mut indent = false
+  let mut strip_whitespace = false
+  let strip_names : Array[String] = []
+  let preserve_names : Array[String] = []
   for node in stylesheet.descendants(root) {
     if !stylesheet.is_element(node) ||
       stylesheet.namespace_uri(node) != XSLT_NAMESPACE {
@@ -179,6 +213,26 @@ pub fn compile(stylesheet : @xml.Document) -> Result[Stylesheet, String] {
         Some(value) => indent = value == "yes"
         None => ()
       }
+    } else if name == "strip-space" || name == "preserve-space" {
+      let elements = match stylesheet.attribute_value(node, "elements") {
+        Some(value) => value
+        None => "*"
+      }
+      for element in split_on_whitespace(elements) {
+        let trimmed = element.trim().to_owned()
+        if trimmed == "" {
+          continue
+        }
+        if name == "strip-space" {
+          if trimmed == "*" {
+            strip_whitespace = true
+          } else {
+            strip_names.push(trimmed)
+          }
+        } else {
+          preserve_names.push(trimmed)
+        }
+      }
     }
   }
   Ok({
@@ -190,6 +244,9 @@ pub fn compile(stylesheet : @xml.Document) -> Result[Stylesheet, String] {
     serialization_method,
     omit_xml_declaration: omit_declaration,
     indent,
+    strip_whitespace,
+    strip_names,
+    preserve_names,
   })
 }
 
@@ -363,4 +420,28 @@ pub fn parse_double(text : String) -> Double? {
   } else {
     Some(value)
   }
+}
+
+///|
+/// Split a list-valued attribute such as `elements="a b  c"` on whitespace.
+fn split_on_whitespace(text : String) -> Array[String] {
+  let parts : Array[String] = []
+  let sb = StringBuilder::StringBuilder()
+  let mut started = false
+  for c in text {
+    if c == ' ' || c == '\t' || c == '\r' || c == '\n' {
+      if started {
+        parts.push(sb.to_string())
+        sb.reset()
+        started = false
+      }
+    } else {
+      sb.write_char(c)
+      started = true
+    }
+  }
+  if started {
+    parts.push(sb.to_string())
+  }
+  parts
 }

@@ -118,6 +118,9 @@ fn Transformer::apply_templates(
   mode : String,
   output_parent : Int32,
 ) -> Unit raise XsltError {
+  if self.should_strip(node) {
+    return
+  }
   let saved_node = self.current_node
   let saved_position = self.current_position
   let saved_size = self.current_size
@@ -472,10 +475,21 @@ fn Transformer::instruction(
         }
       }
     }
+    "number" => {
+      let text = self.number_text(element)
+      let _ = self.result.add_text(output_parent, text)
+    }
     "sort" => ()
     "message" => {
       let text = self.instantiate_text(element)
-      let _ = text
+      let terminate = match
+        self.style.doc.attribute_value(element, "terminate") {
+        Some(value) => value == "yes"
+        None => false
+      }
+      if terminate {
+        return self.fail("xsl:message terminated the transformation: " + text)
+      }
     }
     _ =>
       self.fail(
@@ -805,6 +819,24 @@ fn Transformer::evaluate_boolean(
 }
 
 ///|
+/// Evaluate an XPath expression and convert the result to a number.
+fn Transformer::evaluate_number(
+  self : Transformer,
+  text : String,
+  style_element : Int32,
+) -> Double raise XsltError {
+  let expression = match @xpath.parse(text) {
+    Ok(expression) => expression
+    Err(info) =>
+      self.fail("invalid XPath expression \"" + text + "\": " + info.message)
+  }
+  match @xpath.number_of(self.context(style_element), expression) {
+    Ok(value) => value
+    Err(message) => self.fail(message)
+  }
+}
+
+///|
 /// Expand an attribute value template: literal text is copied, `{expression}`
 /// is replaced by its string value and `{{`/`}}` are unescaped.
 fn Transformer::evaluate_avt(
@@ -1021,6 +1053,26 @@ fn Transformer::copy_subtree(
   } else if self.source.is_attribute(node) {
     self.copy_attribute(node, output_parent)
   }
+}
+
+///|
+/// Whether a source text node is whitespace that xsl:strip-space removes.
+fn Transformer::should_strip(self : Transformer, node : Int32) -> Bool {
+  if !self.source.is_text(node) {
+    return false
+  }
+  if !is_whitespace_only(self.source.value(node)) {
+    return false
+  }
+  let parent = match self.source.parent(node) {
+    Some(parent) => parent
+    None => return false
+  }
+  let name = match self.source.name(parent) {
+    Some(name) => name.qualified()
+    None => return false
+  }
+  self.style.strips_element(name)
 }
 
 ///|

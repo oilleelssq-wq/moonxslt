@@ -14,6 +14,8 @@ pub fn compile_stylesheet(String) -> Result[Stylesheet, String]
 
 pub fn default_priority(String) -> Double
 
+pub fn format_number_value(Int32, String) -> String
+
 pub fn in_scope_namespaces(@xml.Document, Int32) -> Array[(String, String)]
 
 pub fn parse_double(String) -> Double?
@@ -45,12 +47,17 @@ pub struct Stylesheet {
   serialization_method : String
   omit_xml_declaration : Bool
   indent : Bool
+  strip_whitespace : Bool
+  strip_names : Array[String]
+  preserve_names : Array[String]
 }
 pub fn Stylesheet::document(Self) -> @xml.Document
 pub fn Stylesheet::indents(Self) -> Bool
 pub fn Stylesheet::named_template(Self, String) -> Template?
 pub fn Stylesheet::omits_xml_declaration(Self) -> Bool
 pub fn Stylesheet::output_method(Self) -> String
+pub fn Stylesheet::strips_element(Self, String) -> Bool
+pub fn Stylesheet::strips_whitespace(Self) -> Bool
 pub fn Stylesheet::template_count(Self) -> Int32
 pub fn Stylesheet::template_rules(Self) -> ArrayView[Template]
 pub fn Stylesheet::version(Self) -> String

@@ -74,7 +74,7 @@ test "strips whitespace-only text from the stylesheet" {
 ///|
 test "reports unimplemented instructions" {
   let message = transform_error(
-    "<r><item/></r>", "<xsl:template match='/'><xsl:number value='1'/></xsl:template>",
+    "<r><item/></r>", "<xsl:template match='/'><xsl:apply-imports/></xsl:template>",
   )
   assert_true(message.contains("unsupported instruction"))
 }
@@ -199,4 +199,40 @@ test "identity transform preserves attributes and nesting" {
   let body = "<xsl:template match='@*|node()'><xsl:copy><xsl:apply-templates select='@*|node()'/></xsl:copy></xsl:template>"
   let result = transform("<r a='1'><b>t</b></r>", body)
   assert_eq(result, "<r a=\"1\"><b>t</b></r>")
+}
+
+///|
+test "strips whitespace-only text nodes" {
+  let body = "<xsl:strip-space elements='*'/><xsl:template match='/'><out><xsl:apply-templates/></out></xsl:template>"
+  let result = transform("<r> <a>x</a> </r>", body)
+  assert_eq(result, "<out>x</out>")
+}
+
+///|
+test "preserve-space overrides strip-space" {
+  let body = "<xsl:strip-space elements='*'/><xsl:preserve-space elements='pre'/><xsl:template match='/'><out><xsl:apply-templates select='//pre'/></out></xsl:template>"
+  let result = transform("<r><pre> <a>x</a> </pre></r>", body)
+  assert_eq(result, "<out> x </out>")
+}
+
+///|
+test "numbers nodes positionally" {
+  let body = "<xsl:template match='/'><out><xsl:apply-templates select='//b'/></out></xsl:template><xsl:template match='b'><n><xsl:number/></n></xsl:template>"
+  let result = transform("<r><b/><b/><b/></r>", body)
+  assert_eq(result, "<out><n>1</n><n>2</n><n>3</n></out>")
+}
+
+///|
+test "numbers with explicit values, letters and roman numerals" {
+  let body = "<xsl:template match='/'><out><xsl:number value='3'/><xsl:text>-</xsl:text><xsl:number value='4' format='i'/><xsl:text>-</xsl:text><xsl:number value='27' format='A'/></out></xsl:template>"
+  let result = transform("<r/>", body)
+  assert_eq(result, "<out>3-iv-AA</out>")
+}
+
+///|
+test "a terminating message fails the transformation" {
+  let message = transform_error(
+    "<r/>", "<xsl:template match='/'><xsl:message terminate='yes'>stop</xsl:message></xsl:template>",
+  )
+  assert_true(message.contains("stop"))
 }
