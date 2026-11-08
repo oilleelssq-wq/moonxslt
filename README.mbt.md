@@ -82,6 +82,9 @@ moon run cmd/main examples/report/report.xsl examples/report/sales.xml
 
 ## 已知限制
 
+逐项对照见 [docs/conformance.md](docs/conformance.md)。
+
+
 - `key()`、`document()`、`xsl:import`/`xsl:include` 尚未实现。
 - `disable-output-escaping` 属性被忽略。
 - `xsl:param` 只按名字查找是否已有绑定，外层同名变量会被误当成已传入的参数。
