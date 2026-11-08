@@ -423,6 +423,55 @@ fn Transformer::instruction(
         output_parent, target, text,
       )
     }
+    "element" => {
+      let name_text = self.evaluate_avt(
+        self.required_attribute(element, "name"),
+        element,
+      )
+      let namespace_uri = match
+        self.style.doc.attribute_value(element, "namespace") {
+        Some(uri) => Some(self.evaluate_avt(uri, element))
+        None => None
+      }
+      let qname = self.resolve_qname(name_text, namespace_uri, element)
+      let result_element = self.result.add_element(output_parent, qname)
+      self.note_root(result_element)
+      self.ensure_namespace_declared(
+        result_element,
+        qname.prefix(),
+        qname.uri(),
+      )
+      self.instantiate(element, result_element)
+    }
+    "attribute" => {
+      let name_text = self.evaluate_avt(
+        self.required_attribute(element, "name"),
+        element,
+      )
+      let namespace_uri = match
+        self.style.doc.attribute_value(element, "namespace") {
+        Some(uri) => Some(self.evaluate_avt(uri, element))
+        None => None
+      }
+      let qname = self.resolve_qname(name_text, namespace_uri, element)
+      let value = self.instantiate_text(element)
+      let _ = self.result.add_attribute(output_parent, qname, value)
+    }
+    "copy" => self.copy_current(element, output_parent)
+    "copy-of" => {
+      let select = self.required_attribute(element, "select")
+      match self.evaluate_value(select, element).node_set() {
+        Some(set) =>
+          for id in set.nodes() {
+            self.copy_subtree(id, output_parent)
+          }
+        None => {
+          let value = self.evaluate_value(select, element)
+          let text = value.string_value(self.source)
+          let _ = self.result.add_text(output_parent, text)
+        }
+      }
+    }
     "sort" => ()
     "message" => {
       let text = self.instantiate_text(element)
@@ -822,6 +871,158 @@ fn Transformer::required_attribute(
         name +
         " attribute",
       )
+  }
+}
+
+///|
+/// Resolve a QName written in the stylesheet against its in-scope namespaces,
+/// or against an explicit `namespace` attribute.
+fn Transformer::resolve_qname(
+  self : Transformer,
+  text : String,
+  namespace_uri : String?,
+  style_element : Int32,
+) -> @xml.QName raise XsltError {
+  let (prefix, local_name) = match @xml.split_qname(text) {
+    Some(pair) => pair
+    None => return self.fail("invalid QName \"" + text + "\"")
+  }
+  let uri = match namespace_uri {
+    Some(uri) => uri
+    None =>
+      if prefix == "" {
+        ""
+      } else if prefix == "xml" {
+        "http://www.w3.org/XML/1998/namespace"
+      } else {
+        let mut declared : String? = None
+        for declaration in in_scope_namespaces(self.style.doc, style_element) {
+          if declaration.0 == prefix && declared is None {
+            declared = Some(declaration.1)
+          }
+        }
+        match declared {
+          Some(uri) => uri
+          None =>
+            return self.fail("undeclared namespace prefix \"" + prefix + "\"")
+        }
+      }
+  }
+  @xml.QName::new(prefix, local_name, uri)
+}
+
+///|
+/// Shallow-copy the current node, then instantiate the instruction's children.
+fn Transformer::copy_current(
+  self : Transformer,
+  element : Int32,
+  output_parent : Int32,
+) -> Unit raise XsltError {
+  let node = self.current_node
+  if self.source.is_element(node) {
+    let name = match self.source.name(node) {
+      Some(name) => name
+      None => return self.fail("cannot copy an element without a name")
+    }
+    let copy = self.result.add_element(
+      output_parent,
+      @xml.QName::new(name.prefix(), name.local_part(), name.uri()),
+    )
+    self.note_root(copy)
+    for declaration in self.source.namespace_declarations(node) {
+      self.result.declare_namespace(copy, declaration.0, declaration.1)
+    }
+    self.ensure_namespace_declared(copy, name.prefix(), name.uri())
+    for attribute in self.source.attributes(node) {
+      self.copy_attribute(attribute, copy)
+    }
+    self.instantiate(element, copy)
+    return
+  }
+  if self.source.is_text(node) {
+    let _ = self.result.add_text(output_parent, self.source.value(node))
+    return
+  }
+  if self.source.is_comment(node) {
+    let _ = self.result.add_comment(output_parent, self.source.value(node))
+    return
+  }
+  if self.source.is_processing_instruction(node) {
+    let _ = self.result.add_processing_instruction(
+      output_parent,
+      self.source.qualified_name(node),
+      self.source.value(node),
+    )
+    return
+  }
+  if self.source.is_attribute(node) {
+    self.copy_attribute(node, output_parent)
+    return
+  }
+  self.instantiate(element, output_parent)
+}
+
+///|
+/// Copy one attribute node onto a result element.
+fn Transformer::copy_attribute(
+  self : Transformer,
+  attribute : Int32,
+  output_parent : Int32,
+) -> Unit {
+  match self.source.name(attribute) {
+    Some(name) =>
+      if self.result.is_element(output_parent) {
+        let _ = self.result.add_attribute(
+          output_parent,
+          @xml.QName::new(name.prefix(), name.local_part(), name.uri()),
+          self.source.value(attribute),
+        )
+      }
+    None => ()
+  }
+}
+
+///|
+/// Deep-copy a source subtree into the result tree.
+fn Transformer::copy_subtree(
+  self : Transformer,
+  node : Int32,
+  output_parent : Int32,
+) -> Unit raise XsltError {
+  if self.source.is_element(node) {
+    let name = match self.source.name(node) {
+      Some(name) => name
+      None => return self.fail("cannot copy an element without a name")
+    }
+    let copy = self.result.add_element(
+      output_parent,
+      @xml.QName::new(name.prefix(), name.local_part(), name.uri()),
+    )
+    self.note_root(copy)
+    for declaration in self.source.namespace_declarations(node) {
+      self.result.declare_namespace(copy, declaration.0, declaration.1)
+    }
+    self.ensure_namespace_declared(copy, name.prefix(), name.uri())
+    for attribute in self.source.attributes(node) {
+      self.copy_attribute(attribute, copy)
+    }
+    for child in self.source.children(node) {
+      self.copy_subtree(child, copy)
+    }
+    return
+  }
+  if self.source.is_text(node) {
+    let _ = self.result.add_text(output_parent, self.source.value(node))
+  } else if self.source.is_comment(node) {
+    let _ = self.result.add_comment(output_parent, self.source.value(node))
+  } else if self.source.is_processing_instruction(node) {
+    let _ = self.result.add_processing_instruction(
+      output_parent,
+      self.source.qualified_name(node),
+      self.source.value(node),
+    )
+  } else if self.source.is_attribute(node) {
+    self.copy_attribute(node, output_parent)
   }
 }
 

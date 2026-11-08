@@ -197,6 +197,7 @@ pub(all) enum Value {
   String(String)
 }
 pub fn Value::boolean_value(Self) -> Bool
+pub fn Value::node_set(Self) -> NodeSet?
 pub fn Value::number_value(Self, @xml.Document) -> Double
 pub fn Value::of_boolean(Bool) -> Self
 pub fn Value::of_number(Double) -> Self

@@ -268,3 +268,12 @@ pub fn Value::of_number(number : Double) -> Value {
 pub fn Value::of_boolean(flag : Bool) -> Value {
   Boolean(flag)
 }
+
+///|
+/// The node-set behind a value, if the value is a node-set.
+pub fn Value::node_set(self : Value) -> NodeSet? {
+  match self {
+    Nodes(set) => Some(set)
+    _ => None
+  }
+}

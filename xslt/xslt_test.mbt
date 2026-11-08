@@ -144,3 +144,32 @@ test "sorts by numeric keys in descending order" {
   let result = transform("<r><n>2</n><n>10</n><n>1</n></r>", body)
   assert_eq(result, "<out>10,2,1,</out>")
 }
+
+///|
+test "deep-copies selected subtrees with copy-of" {
+  let body = "<xsl:template match='/'><out><xsl:copy-of select='//b'/></out></xsl:template>"
+  let result = transform("<r><b x='1'>t</b></r>", body)
+  assert_eq(result, "<out><b x=\"1\">t</b></out>")
+}
+
+///|
+test "constructs elements and attributes dynamically" {
+  let body = "<xsl:template match='/'><xsl:element name='item'><xsl:attribute name='id'><xsl:value-of select='//n'/></xsl:attribute>text</xsl:element></xsl:template>"
+  let result = transform("<r><n>7</n></r>", body)
+  assert_eq(result, "<item id=\"7\">text</item>")
+}
+
+///|
+test "shallow-copies the current node with copy" {
+  let body = "<xsl:template match='/'><out><xsl:apply-templates select='//item'/></out></xsl:template><xsl:template match='item'><xsl:copy><xsl:value-of select='@x'/></xsl:copy></xsl:template>"
+  let result = transform("<r><item x='9'>old</item></r>", body)
+  assert_eq(result, "<out><item x=\"9\">9</item></out>")
+}
+
+///|
+test "copies namespace declarations with copied elements" {
+  let body = "<xsl:template match='/'><out><xsl:copy-of select='//*'/></out></xsl:template>"
+  let result = transform("<r><ns:b xmlns:ns='urn:x'>t</ns:b></r>", body)
+  assert_true(result.contains("xmlns:ns=\"urn:x\""))
+  assert_true(result.contains("<ns:b"))
+}
