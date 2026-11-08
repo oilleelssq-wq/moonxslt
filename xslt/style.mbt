@@ -47,6 +47,15 @@ pub fn Template::priority(self : Template) -> Double {
 }
 
 ///|
+/// An xsl:key declaration.
+pub struct KeyDeclaration {
+  name : String
+  match_pattern : String
+  use_expression : String
+  element : Int32
+}
+
+///|
 /// A compiled stylesheet.
 pub struct Stylesheet {
   doc : @xml.Document
@@ -61,6 +70,7 @@ pub struct Stylesheet {
   strip_names : Array[String]
   preserve_names : Array[String]
   decimal_formats : Array[(String, DecimalFormat)]
+  keys : Array[KeyDeclaration]
 }
 
 ///|
@@ -161,6 +171,7 @@ pub fn compile(stylesheet : @xml.Document) -> Result[Stylesheet, String] {
   let strip_names : Array[String] = []
   let preserve_names : Array[String] = []
   let decimal_formats : Array[(String, DecimalFormat)] = []
+  let keys : Array[KeyDeclaration] = []
   for node in stylesheet.descendants(root) {
     if !stylesheet.is_element(node) ||
       stylesheet.namespace_uri(node) != XSLT_NAMESPACE {
@@ -215,6 +226,25 @@ pub fn compile(stylesheet : @xml.Document) -> Result[Stylesheet, String] {
         Some(value) => indent = value == "yes"
         None => ()
       }
+    } else if name == "key" {
+      let key_name = match stylesheet.attribute_value(node, "name") {
+        Some(key_name) => key_name
+        None => return Err("xsl:key requires a name attribute")
+      }
+      let match_pattern = match stylesheet.attribute_value(node, "match") {
+        Some(match_pattern) => match_pattern
+        None => return Err("xsl:key requires a match attribute")
+      }
+      let use_expression = match stylesheet.attribute_value(node, "use") {
+        Some(text) => text
+        None => return Err("xsl:key requires a use attribute")
+      }
+      keys.push({
+        name: key_name,
+        match_pattern,
+        use_expression,
+        element: node,
+      })
     } else if name == "decimal-format" {
       let format_name = match stylesheet.attribute_value(node, "name") {
         Some(format_name) => format_name
@@ -258,6 +288,7 @@ pub fn compile(stylesheet : @xml.Document) -> Result[Stylesheet, String] {
     strip_names,
     preserve_names,
     decimal_formats,
+    keys,
   })
 }
 

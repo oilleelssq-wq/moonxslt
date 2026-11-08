@@ -277,3 +277,9 @@ pub fn Value::node_set(self : Value) -> NodeSet? {
     _ => None
   }
 }
+
+///|
+/// Wrap a node-set as an XPath value.
+pub fn Value::of_nodes(set : NodeSet) -> Value {
+  Nodes(set)
+}

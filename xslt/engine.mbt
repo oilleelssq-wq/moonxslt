@@ -18,6 +18,7 @@ priv struct Transformer {
   result : @xml.Document
   cache : Array[@xpath.NodeSet]
   cache_ready : Array[Bool]
+  keys : Array[(String, String, Array[Int32])]
   variables : Array[(String, @xpath.Value)]
   mut current_node : Int32
   mut current_position : Int32
@@ -47,12 +48,14 @@ fn Transformer::new(style : Stylesheet, source : @xml.Document) -> Transformer {
     cache.push(@xpath.NodeSet::empty())
     ready.push(false)
   }
+  let keys = build_key_index(style, source)
   {
     style,
     source,
     result: @xml.Document::empty(),
     cache,
     cache_ready: ready,
+    keys,
     variables: [],
     current_node: 0,
     current_position: 1,
@@ -120,6 +123,31 @@ fn Transformer::context(
     @xpath.Value::of_string(
       format_number(number, pattern, self.style.decimal_format(format_name)),
     )
+  })
+  .with_function("key", (arguments, eval_context) => {
+    if arguments.length() != 2 {
+      @xpath.raise_function_error("key() expects two arguments")
+    }
+    let doc = eval_context.document()
+    let key_name = @xpath.evaluate(arguments[0], eval_context).string_value(doc)
+    let argument = @xpath.evaluate(arguments[1], eval_context)
+    let ids : Array[Int32] = []
+    match argument.node_set() {
+      Some(set) =>
+        for node in set.nodes() {
+          for
+            id in self
+            .key_nodes(key_name, @xpath.string_of_node(doc, node))
+            .nodes() {
+            ids.push(id)
+          }
+        }
+      None =>
+        for id in self.key_nodes(key_name, argument.string_value(doc)).nodes() {
+          ids.push(id)
+        }
+    }
+    @xpath.Value::of_nodes(@xpath.NodeSet::new(self.source, ids))
   })
 }
 
@@ -1091,6 +1119,101 @@ fn Transformer::should_strip(self : Transformer, node : Int32) -> Bool {
     None => return false
   }
   self.style.strips_element(name)
+}
+
+///|
+/// Look up the nodes registered for a key value.
+fn Transformer::key_nodes(
+  self : Transformer,
+  name : String,
+  value : String,
+) -> @xpath.NodeSet {
+  let ids : Array[Int32] = []
+  for entry in self.keys {
+    if entry.0 == name && entry.1 == value {
+      for id in entry.2 {
+        ids.push(id)
+      }
+    }
+  }
+  @xpath.NodeSet::new(self.source, ids)
+}
+
+///|
+/// Build the key index of a stylesheet before the transformation starts.
+fn build_key_index(
+  style : Stylesheet,
+  source : @xml.Document,
+) -> Array[(String, String, Array[Int32])] {
+  let index : Array[(String, String, Array[Int32])] = []
+  for declaration in style.keys {
+    let namespaces = in_scope_namespaces(style.doc, declaration.element)
+    let document_context = @xpath.EvalContext::new(source, 0).with_namespaces(
+      namespaces,
+    )
+    let expression_text = if declaration.match_pattern.has_prefix("/") {
+      declaration.match_pattern
+    } else {
+      "//" + declaration.match_pattern
+    }
+    let match_expression = match @xpath.parse(expression_text) {
+      Ok(expression) => expression
+      Err(_) => continue
+    }
+    let use_expression = match @xpath.parse(declaration.use_expression) {
+      Ok(expression) => expression
+      Err(_) => continue
+    }
+    let matched = match
+      @xpath.select_nodes(document_context, match_expression) {
+      Ok(set) => set
+      Err(_) => continue
+    }
+    for node in matched.nodes() {
+      let node_context = @xpath.EvalContext::new(source, node).with_namespaces(
+        namespaces,
+      )
+      let value = match @xpath.evaluate_with(node_context, use_expression) {
+        Ok(value) => value
+        Err(_) => continue
+      }
+      match value.node_set() {
+        Some(set) =>
+          for used in set.nodes() {
+            add_key_entry(
+              index,
+              declaration.name,
+              @xpath.string_of_node(source, used),
+              node,
+            )
+          }
+        None =>
+          add_key_entry(
+            index,
+            declaration.name,
+            value.string_value(source),
+            node,
+          )
+      }
+    }
+  }
+  index
+}
+
+///|
+fn add_key_entry(
+  index : Array[(String, String, Array[Int32])],
+  name : String,
+  value : String,
+  node : Int32,
+) -> Unit {
+  for entry in index {
+    if entry.0 == name && entry.1 == value {
+      entry.2.push(node)
+      return
+    }
+  }
+  index.push((name, value, [node]))
 }
 
 ///|
