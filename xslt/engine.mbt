@@ -498,6 +498,7 @@ fn Transformer::instruction(
         qname.prefix(),
         qname.uri(),
       )
+      self.apply_use_attribute_sets(element, result_element)
       self.instantiate(element, result_element)
     }
     "attribute" => {
@@ -512,7 +513,7 @@ fn Transformer::instruction(
       }
       let qname = self.resolve_qname(name_text, namespace_uri, element)
       let value = self.instantiate_text(element)
-      let _ = self.result.add_attribute(output_parent, qname, value)
+      self.add_or_replace_attribute(output_parent, qname, value)
     }
     "copy" => self.copy_current(element, output_parent)
     "copy-of" => {
@@ -631,6 +632,7 @@ fn Transformer::literal_element(
     }
   }
   self.ensure_namespace_declared(result_element, name.prefix(), name.uri())
+  self.apply_use_attribute_sets(element, result_element)
   for attribute in self.style.doc.attributes(element) {
     let attribute_name = match self.style.doc.name(attribute) {
       Some(attribute_name) => attribute_name
@@ -645,13 +647,99 @@ fn Transformer::literal_element(
       continue
     }
     let value = self.evaluate_avt(self.style.doc.value(attribute), element)
-    let _ = self.result.add_attribute(
+    self.add_or_replace_attribute(
       result_element,
       @xml.QName::new(attribute_prefix, attribute_local, attribute_name.uri()),
       value,
     )
   }
   self.instantiate(element, result_element)
+}
+
+///|
+/// Add an attribute, replacing the value when the element already has an
+/// attribute with the same expanded name.
+fn Transformer::add_or_replace_attribute(
+  self : Transformer,
+  element : Int32,
+  name : @xml.QName,
+  value : String,
+) -> Unit {
+  for attribute in self.result.attributes(element) {
+    match self.result.name(attribute) {
+      Some(existing) =>
+        if existing.local_part() == name.local_part() &&
+          existing.uri() == name.uri() {
+          self.result.set_attribute_value(attribute, value)
+          return
+        }
+      None => ()
+    }
+  }
+  let _ = self.result.add_attribute(element, name, value)
+}
+
+///|
+/// Apply the attribute sets named by an element's use-attribute-sets
+/// attribute.
+fn Transformer::apply_use_attribute_sets(
+  self : Transformer,
+  element : Int32,
+  result_element : Int32,
+) -> Unit raise XsltError {
+  match self.style.doc.attribute_value(element, "use-attribute-sets") {
+    Some(names) => {
+      let applied : Array[String] = []
+      self.apply_attribute_sets(names, result_element, applied)
+    }
+    None => ()
+  }
+}
+
+///|
+/// Add the attributes of each named attribute set, following nested
+/// use-attribute-sets references.
+fn Transformer::apply_attribute_sets(
+  self : Transformer,
+  names : String,
+  result_element : Int32,
+  applied : Array[String],
+) -> Unit raise XsltError {
+  for name in split_on_whitespace(names) {
+    let trimmed = name.trim().to_owned()
+    if trimmed == "" {
+      continue
+    }
+    let mut already_applied = false
+    for entry in applied {
+      if entry == trimmed {
+        already_applied = true
+      }
+    }
+    if already_applied {
+      continue
+    }
+    let set_element = match self.style.attribute_set(trimmed) {
+      Some(set_element) => set_element
+      None => continue
+    }
+    applied.push(trimmed)
+    match self.style.doc.attribute_value(set_element, "use-attribute-sets") {
+      Some(nested) => self.apply_attribute_sets(nested, result_element, applied)
+      None => ()
+    }
+    for child in self.style.doc.children(set_element) {
+      if self.style.doc.is_element(child) &&
+        self.style.doc.namespace_uri(child) == XSLT_NAMESPACE &&
+        self.style.doc.local_name(child) == "attribute" {
+        self.instruction(
+          self.style.doc.local_name(child),
+          child,
+          result_element,
+        )
+      }
+    }
+  }
 }
 
 ///|

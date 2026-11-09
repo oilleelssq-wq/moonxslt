@@ -83,7 +83,9 @@ pub struct Stylesheet {
   preserve_names : Array[String]
   decimal_formats : Array[(String, DecimalFormat)]
   keys : Array[KeyDeclaration]
+  attribute_sets : Array[(String, Int32)]
 }
+pub fn Stylesheet::attribute_set(Self, String) -> Int32?
 pub fn Stylesheet::decimal_format(Self, String) -> DecimalFormat
 pub fn Stylesheet::document(Self) -> @xml.Document
 pub fn Stylesheet::indents(Self) -> Bool

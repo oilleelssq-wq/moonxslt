@@ -81,5 +81,6 @@ CI 在 Ubuntu 上安装 MoonBit 工具链，跑 `moon check --deny-warn`、`moon
 | 8 | format-number、decimal-format | 完成 |
 | 9 | key() | 完成 |
 | 10 | include / import（loader） | 完成（import 无优先级差异） |
-| 11 | document() | 计划 |
-| 12 | 发布到 mooncakes.io | 待发布 |
+| 11 | attribute-set | 完成 |
+| 12 | document() | 计划 |
+| 13 | 发布到 mooncakes.io | 待发布 |

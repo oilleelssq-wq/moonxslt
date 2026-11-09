@@ -71,6 +71,7 @@ pub struct Stylesheet {
   preserve_names : Array[String]
   decimal_formats : Array[(String, DecimalFormat)]
   keys : Array[KeyDeclaration]
+  attribute_sets : Array[(String, Int32)]
 }
 
 ///|
@@ -172,6 +173,7 @@ pub fn compile(stylesheet : @xml.Document) -> Result[Stylesheet, String] {
   let preserve_names : Array[String] = []
   let decimal_formats : Array[(String, DecimalFormat)] = []
   let keys : Array[KeyDeclaration] = []
+  let attribute_sets : Array[(String, Int32)] = []
   for node in stylesheet.descendants(root) {
     if !stylesheet.is_element(node) ||
       stylesheet.namespace_uri(node) != XSLT_NAMESPACE {
@@ -233,6 +235,12 @@ pub fn compile(stylesheet : @xml.Document) -> Result[Stylesheet, String] {
         Some(value) => indent = value == "yes"
         None => ()
       }
+    } else if name == "attribute-set" {
+      let set_name = match stylesheet.attribute_value(node, "name") {
+        Some(set_name) => set_name
+        None => return Err("xsl:attribute-set requires a name attribute")
+      }
+      attribute_sets.push((set_name, node))
     } else if name == "key" {
       let key_name = match stylesheet.attribute_value(node, "name") {
         Some(key_name) => key_name
@@ -296,6 +304,7 @@ pub fn compile(stylesheet : @xml.Document) -> Result[Stylesheet, String] {
     preserve_names,
     decimal_formats,
     keys,
+    attribute_sets,
   })
 }
 
@@ -609,4 +618,15 @@ fn expand_includes(
     stylesheet.remove_child(root, child)
   }
   Ok(())
+}
+
+///|
+/// The `xsl:attribute-set` with the given name, if any.
+pub fn Stylesheet::attribute_set(self : Stylesheet, name : String) -> Int32? {
+  for entry in self.attribute_sets {
+    if entry.0 == name {
+      return Some(entry.1)
+    }
+  }
+  None
 }

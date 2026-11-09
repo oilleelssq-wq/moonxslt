@@ -71,6 +71,7 @@ pub fn Document::remove_child(Self, Int32, Int32) -> Unit
 pub fn Document::resolve_prefix(Self, Int32, String) -> String?
 pub fn Document::root(Self) -> Int32?
 pub fn Document::root_of(Self, Int32) -> Int32
+pub fn Document::set_attribute_value(Self, Int32, String) -> Unit
 pub fn Document::set_element_name(Self, Int32, String, String, String) -> Unit
 pub fn Document::set_root(Self, Int32) -> Unit
 pub fn Document::sort_document_order(Self, Array[Int32]) -> Array[Int32]

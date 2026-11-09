@@ -678,3 +678,13 @@ pub fn Document::remove_child(
   }
   self.nodes[parent].children = kept
 }
+
+///|
+/// Change the value of an existing attribute node.
+pub fn Document::set_attribute_value(
+  self : Document,
+  attribute : Int32,
+  value : String,
+) -> Unit {
+  self.nodes[attribute].value = value
+}
