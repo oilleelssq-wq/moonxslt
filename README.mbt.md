@@ -1,5 +1,8 @@
 # moonxslt
 
+[![CI](https://github.com/oilleelssq-wq/moonxslt/actions/workflows/ci.yml/badge.svg)](https://github.com/oilleelssq-wq/moonxslt/actions/workflows/ci.yml)
+[![mooncakes](https://img.shields.io/badge/mooncakes-0.2.0-blue)](https://mooncakes.io/docs/oilleelssq-wq/moonxslt)
+
 纯 MoonBit 实现的 **XSLT 1.0 处理器**：自带 XML 解析器、XPath 1.0 引擎和样式表执行引擎，零第三方依赖。
 
 XSLT 是 W3C 的 XML 转换标准。给一份样式表和一份 XML，它输出新的 XML、HTML 或纯文本。文档发布、数据交换、静态站点生成、报表导出都依赖它。MoonBit 生态目前没有 XSLT 处理器（`moon search xslt` 返回 0 条结果），已有的 XML 库只提供拉式解析，没有样式表执行能力。
