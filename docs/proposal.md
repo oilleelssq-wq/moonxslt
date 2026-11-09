@@ -25,4 +25,4 @@ MoonBit 生态没有 XSLT 实现（`moon search xslt` 无结果）：现有 XML 
 
 ## 进度与交付物
 
-三个包 + CLI + 五个可运行示例；97 个测试；CI 跑 check/build/test/格式/接口；Apache-2.0；0.2.0 待发布 mooncakes.io；`document()` 与少数边缘特性未实现（见 `docs/conformance.md`）。
+三个包 + CLI + 五个可运行示例；97 个测试；CI 跑 check/build/test/格式/接口；Apache-2.0；已发布 mooncakes.io（`oilleelssq-wq/moonxslt` 0.2.0）；`document()` 与少数边缘特性未实现（见 `docs/conformance.md`）。

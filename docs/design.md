@@ -83,4 +83,4 @@ CI 在 Ubuntu 上安装 MoonBit 工具链，跑 `moon check --deny-warn`、`moon
 | 10 | include / import（loader） | 完成（import 无优先级差异） |
 | 11 | attribute-set | 完成 |
 | 12 | document() | 计划 |
-| 13 | 发布到 mooncakes.io | 待发布 |
+| 13 | 发布到 mooncakes.io | 完成（0.2.0） |
