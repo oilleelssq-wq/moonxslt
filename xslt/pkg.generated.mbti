@@ -12,6 +12,10 @@ pub fn compile(@xml.Document) -> Result[Stylesheet, String]
 
 pub fn compile_stylesheet(String) -> Result[Stylesheet, String]
 
+pub fn compile_stylesheet_with_loader(String, (String) -> Result[String, String]) -> Result[Stylesheet, String]
+
+pub fn compile_with_loader(@xml.Document, (String) -> Result[String, String]) -> Result[Stylesheet, String]
+
 pub fn decimal_format_from_element(@xml.Document, Int32) -> DecimalFormat
 
 pub fn default_priority(String) -> Double
@@ -35,6 +39,8 @@ pub fn split_pattern_alternatives(String) -> Array[String]
 pub fn transform(String, String) -> Result[String, String]
 
 pub fn transform_documents(@xml.Document, Stylesheet) -> Result[@xml.Document, String]
+
+pub fn transform_with_loader(String, String, (String) -> Result[String, String]) -> Result[String, String]
 
 // Errors
 pub suberror XsltError {
@@ -104,5 +110,6 @@ pub fn Template::priority(Self) -> Double
 pub fn Template::template_name(Self) -> String?
 
 // Type aliases
+pub type Loader = (String) -> Result[String, String]
 
 // Traits

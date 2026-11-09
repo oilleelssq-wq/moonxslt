@@ -61,3 +61,46 @@ pub fn serialise(result : @xml.Document, stylesheet : Stylesheet) -> String {
       )
   }
 }
+
+///|
+/// Transform an XML document with a stylesheet that may use `xsl:include` or
+/// `xsl:import`.
+///
+/// The loader receives the `href` of an included stylesheet and returns its
+/// text, or an error message.
+pub fn transform_with_loader(
+  source_xml : String,
+  stylesheet_xml : String,
+  loader : Loader,
+) -> Result[String, String] {
+  let source = match @xml.parse(source_xml) {
+    Ok(doc) => doc
+    Err(info) => return Err("source document: " + info.message)
+  }
+  let stylesheet_document = match @xml.parse(stylesheet_xml) {
+    Ok(doc) => doc
+    Err(info) => return Err("stylesheet: " + info.message)
+  }
+  let stylesheet = match compile_with_loader(stylesheet_document, loader) {
+    Ok(stylesheet) => stylesheet
+    Err(message) => return Err(message)
+  }
+  let result = match run(stylesheet, source) {
+    Ok(doc) => doc
+    Err(message) => return Err(message)
+  }
+  Ok(serialise(result, stylesheet))
+}
+
+///|
+/// Compile a stylesheet that may include other stylesheets.
+pub fn compile_stylesheet_with_loader(
+  stylesheet_xml : String,
+  loader : Loader,
+) -> Result[Stylesheet, String] {
+  let document = match @xml.parse(stylesheet_xml) {
+    Ok(document) => document
+    Err(info) => return Err("stylesheet: " + info.message)
+  }
+  compile_with_loader(document, loader)
+}

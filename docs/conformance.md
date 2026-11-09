@@ -29,9 +29,9 @@
 | `xsl:message` | ✅ | `terminate="yes"` 中止变换 |
 | `xsl:output` | ✅ | `method`（xml/html/text）、`indent`、`omit-xml-declaration`；`doctype-*`、`cdata-section-elements` 未实现 |
 | `xsl:strip-space` / `xsl:preserve-space` | ◐ | 按元素名或 `*` 生效，但只影响模板处理，显式 `//text()` 仍看得到空白文本 |
-| `xsl:apply-imports` | ❌ | 需要 `xsl:import` |
-| `xsl:import` / `xsl:include` | ❌ | 需要外部样式表加载 |
-| `xsl:document()` | ❌ | 需要外部文档加载 |
+| `xsl:apply-imports` | ❌ | 需要 import precedence |
+| `xsl:import` / `xsl:include` | ✅ | 通过 loader 展开；`import` 与 `include` 等价，没有优先级差异 |
+| `document()` | ❌ | 需要把外部文档并入 XPath 数据模型 |
 | `xsl:attribute-set` | ❌ | |
 | `xsl:namespace-alias` | ❌ | |
 | `xsl:fallback` | ❌ | 不支持的前向兼容元素会直接报错 |
@@ -69,6 +69,8 @@
 
 - `xsl:param` 的默认值只在没有同名绑定时生效；外层同名变量会被误当成已传入的
   参数。
+- `xsl:import` 与 `xsl:include` 等价：被导入的模板与包含进来的模板优先级相同，
+  `xsl:apply-imports` 不支持。
 - 空白剥离在解析后的文档上做，而不是在解析阶段；`//text()` 能绕过剥离。
 - 文本节点相邻时合并，但 `disable-output-escaping` 不同的相邻文本不会合并。
 - 解析器跳过 DOCTYPE 内部子集，不展开自定义实体；只支持五个预定义实体与

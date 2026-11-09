@@ -47,9 +47,12 @@ moon run cmd/main examples/books/books.xsl examples/books/books.xml
 moon run cmd/main examples/books/books.xsl examples/books/books.xml out.xml
 moon run cmd/main examples/html/books.xsl examples/books/books.xml
 moon run cmd/main examples/report/report.xsl examples/report/sales.xml
+moon run cmd/main examples/include/prices.xsl examples/include/items.xml
 ```
 
-仓库里的三个示例分别演示：按数值排序并汇总（`examples/books`）、HTML 输出方法（`examples/html`）、用 `xsl:copy` 写恒等变换（`examples/identity`）。
+仓库里的五个示例分别演示：按数值排序并汇总（`examples/books`）、HTML 输出方法（`examples/html`）、用 `xsl:copy` 写恒等变换（`examples/identity`）、用 `xsl:key` 分组汇总（`examples/report`）、用 `xsl:include` 拆分样式表（`examples/include`）。
+
+需要拆分的样式表用 `transform_with_loader`：加载器收到 `href`，返回对应文本即可。`xsl:import` 目前按 `xsl:include` 处理，导入的模板与包含的模板优先级相同（没有实现 import precedence）。
 
 ## 已实现
 
@@ -60,7 +63,7 @@ moon run cmd/main examples/report/report.xsl examples/report/sales.xml
 | `xslt` | 模板匹配与优先级、`mode`、内置模板规则、属性值模板、`xsl:value-of`、`xsl:apply-templates`、`xsl:call-template`/`xsl:with-param`、`xsl:variable`/`xsl:param`、`xsl:if`、`xsl:choose`、`xsl:for-each`、`xsl:sort`、`xsl:copy`/`xsl:copy-of`、`xsl:element`/`xsl:attribute`、`xsl:comment`、`xsl:processing-instruction`、`xsl:text`、`xsl:number`、`xsl:message`、`xsl:strip-space`/`xsl:preserve-space`、`format-number`/`xsl:decimal-format`；xml / html / text 三种输出方法 |
 | CLI | `moonxslt <stylesheet> <source> [output]` |
 
-测试共 86 个，覆盖解析、XPath 求值、模板选择、变量作用域、动态构造、编号、键索引、转义控制与序列化。
+测试共 92 个，覆盖解析、XPath 求值、模板选择、变量作用域、动态构造、编号、键索引、外部样式表加载、转义控制与序列化。
 
 ## 文档模型
 
@@ -84,9 +87,8 @@ moon run cmd/main examples/report/report.xsl examples/report/sales.xml
 
 逐项对照见 [docs/conformance.md](docs/conformance.md)。
 
-
-- `key()`、`document()`、`xsl:import`/`xsl:include` 尚未实现。
-- `disable-output-escaping` 属性被忽略。
+- `document()` 尚未实现：它需要把外部文档并入 XPath 数据模型，而不只是解析。
+- `xsl:import` 没有实现 import precedence，和 `xsl:include` 等价；`xsl:apply-imports` 仍不支持。
 - `xsl:param` 只按名字查找是否已有绑定，外层同名变量会被误当成已传入的参数。
 - 空白剥离只作用于模板处理：显式写 `//text()` 的 XPath 表达式仍能看到被剥离的空白文本节点。
 - `xsl:number` 的 `count` 只支持名字测试与 `*`，不支持带谓词或并集的模式。

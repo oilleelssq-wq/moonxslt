@@ -103,7 +103,7 @@ struct Node {
   mut name : QName?
   mut value : String
   attrs : Array[Int32]
-  children : Array[Int32]
+  mut children : Array[Int32]
   parent : Int32
   ns_decls : Array[(String, String)]
   escape : Bool
@@ -605,4 +605,76 @@ pub fn Document::resolve_prefix(
   } else {
     None
   }
+}
+
+///|
+/// Copy a subtree from another document under `parent`.
+///
+/// Names are already resolved in the source document, so the copy keeps the
+/// resolved names, the namespace declarations and the text escaping flags.
+/// Returns the id of the copied node, or `parent` for node kinds that cannot
+/// be copied (document and attribute nodes).
+pub fn Document::import_subtree(
+  self : Document,
+  parent : Int32,
+  source : Document,
+  node : Int32,
+) -> Int32 {
+  let from = source.nodes[node]
+  match from.kind {
+    Element => {
+      let name = match from.name {
+        Some(name) => name
+        None => QName::new("", "", "")
+      }
+      let id = self.add_element(parent, name)
+      for declaration in from.ns_decls {
+        self.declare_namespace(id, declaration.0, declaration.1)
+      }
+      for attribute in from.attrs {
+        let attribute_node = source.nodes[attribute]
+        let attribute_name = match attribute_node.name {
+          Some(attribute_name) => attribute_name
+          None => QName::new("", "", "")
+        }
+        let _ = self.add_attribute(id, attribute_name, attribute_node.value)
+      }
+      for child in from.children {
+        let _ = self.import_subtree(id, source, child)
+      }
+      id
+    }
+    Text =>
+      if from.escape {
+        self.add_text(parent, from.value)
+      } else {
+        self.add_raw_text(parent, from.value)
+      }
+    Comment => self.add_comment(parent, from.value)
+    ProcessingInstruction => {
+      let target = match from.name {
+        Some(name) => name.local_part
+        None => ""
+      }
+      self.add_processing_instruction(parent, target, from.value)
+    }
+    _ => parent
+  }
+}
+
+///|
+/// Remove a child from its parent.
+pub fn Document::remove_child(
+  self : Document,
+  parent : Int32,
+  child : Int32,
+) -> Unit {
+  let children = self.nodes[parent].children
+  let kept : Array[Int32] = []
+  for id in children {
+    if id != child {
+      kept.push(id)
+    }
+  }
+  self.nodes[parent].children = kept
 }

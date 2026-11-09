@@ -37,7 +37,7 @@ XML 转换是文档发布、数据交换、报表导出里的常规工作，XSLT
 
 ## 当前进度
 
-已完成：三个包 + CLI + 三个可运行示例；86 个测试；GitHub Actions 做 `moon check --deny-warn`、构建、测试、格式检查和接口一致性检查。
+已完成：三个包 + CLI + 三个可运行示例；92 个测试；GitHub Actions 做 `moon check --deny-warn`、构建、测试、格式检查和接口一致性检查。
 
 进行中/计划：`format-number`、`xsl:decimal-format`、`key()`、`document()`、`xsl:import`/`xsl:include`、`disable-output-escaping`。
 
@@ -48,7 +48,7 @@ XML 转换是文档发布、数据交换、报表导出里的常规工作，XSLT
 | MoonBit 为主语言 | 全部代码是 MoonBit，无其他语言源码 |
 | CI 跑 check/build/test | `.github/workflows/ci.yml` |
 | 可运行示例 | `examples/books`、`examples/html`、`examples/identity`，CLI 直接可跑 |
-| 完整测试 | 86 个测试，覆盖解析、XPath、模板选择、变量、构造、编号、序列化 |
+| 完整测试 | 92 个测试，覆盖解析、XPath、模板选择、变量、构造、编号、序列化 |
 | OSI 许可证 | Apache-2.0 |
 | 发布到 mooncakes.io | 代码已就绪，待发布 |
 

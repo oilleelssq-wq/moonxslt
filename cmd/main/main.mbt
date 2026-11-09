@@ -6,6 +6,18 @@
 // written to standard output, or to the file named by the third argument.
 
 ///|
+/// Read a file referenced by xsl:include or xsl:import.
+fn load_external(uri : String) -> Result[String, String] {
+  let mut outcome : Result[String, String] = Err("cannot read " + uri)
+  try {
+    outcome = Ok(@fs.read_file_to_string(uri))
+  } catch {
+    _ => ()
+  }
+  outcome
+}
+
+///|
 fn main {
   let args = @env.args()
   if args.length() < 3 {
@@ -21,7 +33,8 @@ fn main {
   try {
     let stylesheet_text = @fs.read_file_to_string(stylesheet_path)
     let source_text = @fs.read_file_to_string(source_path)
-    match @xslt.transform(source_text, stylesheet_text) {
+    match
+      @xslt.transform_with_loader(source_text, stylesheet_text, load_external) {
       Ok(result) =>
         if args.length() >= 4 {
           @fs.write_string_to_file(args[3], result)

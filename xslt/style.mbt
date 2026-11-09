@@ -178,6 +178,13 @@ pub fn compile(stylesheet : @xml.Document) -> Result[Stylesheet, String] {
       continue
     }
     let name = stylesheet.local_name(node)
+    if name == "include" || name == "import" {
+      return Err(
+        "xsl:" +
+        name +
+        " requires an external stylesheet loader; use compile_with_loader",
+      )
+    }
     if name == "template" {
       let pattern = stylesheet.attribute_value(node, "match")
       let template_name = stylesheet.attribute_value(node, "name")
@@ -500,4 +507,106 @@ pub fn Stylesheet::decimal_format(
     }
   }
   DecimalFormat::default()
+}
+
+///|
+/// Loads an external stylesheet by the URI written in an `href` attribute.
+///
+/// Returning `Err` makes the compiler report the message and stop.
+pub type Loader = (String) -> Result[String, String]
+
+///|
+/// Compile a stylesheet after expanding `xsl:include` and `xsl:import`.
+///
+/// The included stylesheets are parsed with the same parser and their
+/// top-level declarations are copied into the including document, so the rest
+/// of the engine keeps working with a single document arena.
+pub fn compile_with_loader(
+  stylesheet : @xml.Document,
+  loader : Loader,
+) -> Result[Stylesheet, String] {
+  match expand_includes(stylesheet, loader, []) {
+    Ok(_) => compile(stylesheet)
+    Err(message) => Err(message)
+  }
+}
+
+///|
+fn expand_includes(
+  stylesheet : @xml.Document,
+  loader : Loader,
+  seen : Array[String],
+) -> Result[Unit, String] {
+  let root = match stylesheet.root() {
+    Some(root) => root
+    None => return Err("stylesheet has no root element")
+  }
+  let children : Array[Int32] = []
+  for child in stylesheet.children(root) {
+    children.push(child)
+  }
+  for child in children {
+    if !stylesheet.is_element(child) ||
+      stylesheet.namespace_uri(child) != XSLT_NAMESPACE {
+      continue
+    }
+    let name = stylesheet.local_name(child)
+    if name != "include" && name != "import" {
+      continue
+    }
+    let href = match stylesheet.attribute_value(child, "href") {
+      Some(href) => href
+      None => return Err("xsl:" + name + " requires an href attribute")
+    }
+    let mut already_seen = false
+    for entry in seen {
+      if entry == href {
+        already_seen = true
+      }
+    }
+    if already_seen {
+      return Err("circular xsl:" + name + " of " + href)
+    }
+    let text = match loader(href) {
+      Ok(text) => text
+      Err(message) => return Err("cannot load " + href + ": " + message)
+    }
+    let document = match @xml.parse(text) {
+      Ok(document) => document
+      Err(info) =>
+        return Err("included stylesheet " + href + ": " + info.message)
+    }
+    let next_seen : Array[String] = []
+    for entry in seen {
+      next_seen.push(entry)
+    }
+    next_seen.push(href)
+    match expand_includes(document, loader, next_seen) {
+      Ok(_) => ()
+      Err(message) => return Err(message)
+    }
+    let included_root = match document.root() {
+      Some(included_root) => included_root
+      None => return Err("included stylesheet " + href + " has no root element")
+    }
+    let declarations : Array[(String, String)] = []
+    for declaration in document.namespace_declarations(included_root) {
+      declarations.push(declaration)
+    }
+    let imported_children : Array[Int32] = []
+    for grandchild in document.children(included_root) {
+      imported_children.push(
+        stylesheet.import_subtree(root, document, grandchild),
+      )
+    }
+    for imported in imported_children {
+      if stylesheet.is_element(imported) {
+        for declaration in declarations {
+          stylesheet.declare_namespace(imported, declaration.0, declaration.1)
+        }
+      }
+    }
+    stylesheet.remove_child(root, child)
+  }
+  Ok(())
 }

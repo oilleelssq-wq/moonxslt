@@ -49,3 +49,4 @@ jobs:
           moon run cmd/main examples/html/books.xsl examples/books/books.xml
           moon run cmd/main examples/identity/identity.xsl examples/books/books.xml
           moon run cmd/main examples/report/report.xsl examples/report/sales.xml
+          moon run cmd/main examples/include/prices.xsl examples/include/items.xml

@@ -46,6 +46,7 @@ pub fn Document::empty() -> Self
 pub fn Document::following(Self, Int32) -> Array[Int32]
 pub fn Document::following_siblings(Self, Int32) -> Array[Int32]
 pub fn Document::has_children(Self, Int32) -> Bool
+pub fn Document::import_subtree(Self, Int32, Self, Int32) -> Int32
 pub fn Document::index_in_parent(Self, Int32) -> Int32?
 pub fn Document::is_attribute(Self, Int32) -> Bool
 pub fn Document::is_comment(Self, Int32) -> Bool
@@ -66,6 +67,7 @@ pub fn Document::parent(Self, Int32) -> Int32?
 pub fn Document::preceding(Self, Int32) -> Array[Int32]
 pub fn Document::preceding_siblings(Self, Int32) -> Array[Int32]
 pub fn Document::qualified_name(Self, Int32) -> String
+pub fn Document::remove_child(Self, Int32, Int32) -> Unit
 pub fn Document::resolve_prefix(Self, Int32, String) -> String?
 pub fn Document::root(Self) -> Int32?
 pub fn Document::root_of(Self, Int32) -> Int32
