@@ -2,7 +2,6 @@
 
 - 项目名称：moonxslt
 - GitHub：https://github.com/oilleelssq-wq/moonxslt
-- Gitlink：待创建并与 GitHub 同步
 - 许可证：Apache-2.0；性质：原创项目，不移植、不复用既有 MoonBit 项目
 
 ## 一句话说明
