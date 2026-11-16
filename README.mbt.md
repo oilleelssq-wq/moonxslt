@@ -1,7 +1,7 @@
 # moonxslt
 
 [![CI](https://github.com/oilleelssq-wq/moonxslt/actions/workflows/ci.yml/badge.svg)](https://github.com/oilleelssq-wq/moonxslt/actions/workflows/ci.yml)
-[![mooncakes](https://img.shields.io/badge/mooncakes-0.2.0-blue)](https://mooncakes.io/docs/oilleelssq-wq/moonxslt)
+[![mooncakes](https://img.shields.io/badge/mooncakes-0.2.1-blue)](https://mooncakes.io/docs/oilleelssq-wq/moonxslt)
 
 纯 MoonBit 实现的 **XSLT 1.0 处理器**：自带 XML 解析器、XPath 1.0 引擎和样式表执行引擎，零第三方依赖。
 
