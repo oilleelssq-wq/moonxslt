@@ -26,4 +26,4 @@ MoonBit 里做 XML 转换只能手写字符串拼接，字段一多变就难维�
 常见路径是绑定 libxslt，但 MoonBit 不能依赖 C 运行时，只能自己写。实现顺序定为「解析器 → XPath → 模板引擎」：XSLT 的模式匹配、变量求值和排序全部建立在 XPath 之上，先有稳定的 XPath 才能把模板引擎做对。关键取舍：文档用 arena + 整数 id，文档序比较便宜且没有父指针环；`match` 模式编译成绝对 XPath 并缓存命中集，模板选择退化为集合查询；变量用栈加栈高实现词法作用域；`format-number`、`key()` 这类需要样式表信息的函数通过 `EvalContext` 的扩展函数钩子注入，而不是塞进 XPath 核心。
 
 **交付状态**
-97 个测试通过；`moon check --deny-warn`、`moon fmt --check`、接口一致性检查均通过；GitHub Actions 覆盖检查、构建、测试并运行 5 个示例；`oilleelssq-wq/moonxslt@0.2.0` 已发布到 mooncakes.io；Apache-2.0，仓库无第三方源码。
+97 个测试通过；`moon check --deny-warn`、`moon fmt --check`、接口一致性检查均通过；GitHub Actions 覆盖检查、构建、测试并运行 5 个示例；`oilleelssq-wq/moonxslt@0.2.1` 已发布到 mooncakes.io；Apache-2.0，仓库无第三方源码。
